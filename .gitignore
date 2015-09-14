@@ -2,16 +2,15 @@
 *.pyc
 
 # project specific files
-.project
-.pydevproject
-SoccerKeepAway/.pydevproject
+*.project
+*.pydevproject
 
 # Generated files
 __pycache__/
 
 #project specific local folder I think
-.metadata/
+*.metadata/
 
 
 #windows generated thumbnails
-images/Thumbs.db
+SoccerKeepAway/images/Thumbs.db
