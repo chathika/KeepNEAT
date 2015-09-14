@@ -6,7 +6,7 @@
 *.pydevproject
 
 # Generated files
-__pycache__/
+SoccerKeepAway/__pycache__/
 
 #project specific local folder I think
 *.metadata/
