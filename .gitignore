@@ -4,7 +4,7 @@
 # project specific files
 .project
 .pydevproject
-
+SoccerKeepAway/.pydevproject
 
 # Generated files
 __pycache__/
@@ -12,5 +12,6 @@ __pycache__/
 #project specific local folder I think
 .metadata/
 
+
 #windows generated thumbnails
-images\Thumbs.db
+images/Thumbs.db
