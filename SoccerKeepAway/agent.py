@@ -115,34 +115,34 @@ class agent():
     #just hold your ground and return        
     def holdBall(self):
         if self.fieldBall == None:
-            print("ERROR: trying to hold ball without actually having  ball")
+            print "ERROR: trying to hold ball without actually having  ball" 
         return
     
     #just a temporary function to draw the vectors that are being calculated for debugging purposes
     def debugPassVectors(self, startPoint, vectors):
         self.worldRef.drawWorld ()
         self.worldRef.displayScore()
-        print("Starting point: ", startPoint)
+        print "Starting point: ", startPoint 
         for vector in vectors:
             newVector = kUtil.addVectorToPoint(startPoint, kUtil.scalarMultiply(5, vector))
-            print("printing vector: ", newVector)
+            print "printing vector: ", newVector
             self.worldRef.gameDisplay.blit(self.worldRef.debugYellowDotImage, (newVector[1], newVector[0]))
         self.worldRef.gameDisplay.blit(self.worldRef.debugRedDotImage, (startPoint[1], startPoint[0]))
         pygame.display.update()
-        print("debugging")
+        print "debugging"
             
     #only keeper 0 will have this option available
     def passBall(self, integerK):
-        print("passing to team mate ", integerK +1)
+        print "passing to team mate ", integerK +1
         #if you're passing to integerK = 1, then that means pass to the keeper that's closer to you
         #if you're passing ot integerK = 2, then that means pass to the keeper that's farther to you
         #0 is an invalid input
         sortedKeepers = sorted(self.keeperArray)
         if integerK == 0:
-            print("Invalid input for integerK! integerK not allowed to be", integerK)
+            print "Invalid input for integerK! integerK not allowed to be", integerK
             return
         if self.fieldBall == None:
-            print("ERROR: trying to hold ball without actually having  ball")
+            print "ERROR: trying to hold ball without actually having  ball"
             return
         
         #pass to team mate integerK. if integerK = 1, then it's the 2nd element in array
@@ -167,7 +167,7 @@ class agent():
             if( calcReceive.calc_receive(self.worldRef, passVectorsToConsider[i]) != None): 
                 selfToTeammateDirection = passVectorsToConsider[i]
                 selfToTeammateVector = (kUtil.scalarMultiply(self.fieldBall.maxBallSpeed, selfToTeammateDirection))
-                print("PASS USING ANGLE ACHEIVED AT i=", i)
+                print "PASS USING ANGLE ACHEIVED AT i=", i
                 break
         """    
                 
@@ -202,7 +202,7 @@ class agent():
         #denominator = 2 * (ax*ax + ay*ay) #should be 2 every time if A is a unit vector
         denominator = 2 #should be 2 every time if A is a unit vector
         bx1 = (term1 - discriminant) / denominator
-        #print("term1: ", term1, " discriminant:", discriminant, " denominator: ", denominator)
+        #print "term1: ", term1, " discriminant:", discriminant, " denominator: ", denominator
         by1 = math.sqrt(1.0 - (bx1 * bx1))
         returnUnitVectors = []
         #make it (row,col) format, so therefore it's (y,x)
@@ -214,8 +214,8 @@ class agent():
             by2 = math.sqrt(1.0 - (bx2 * bx2))
             returnUnitVectors.append((by2, bx2))
             returnUnitVectors.append((-1.0 * by2, bx2)) 
-            #print("return vectors")  
-            #print(returnVectors)
+            #print "return vectors"
+            #print returnVectors
             returnUnitVectors = sorted(returnUnitVectors, key=lambda x: kUtil.getSqrDist(terminalPosCosZero, x))
             
         return returnUnitVectors[:2]
@@ -290,7 +290,7 @@ class agent():
         
     def receive(self):
         if self.inPosession == True:
-            print("you're not supposed to be receiving you idiot, you have the ball!!!!!")
+            print "you're not supposed to be receiving you idiot, you have the ball!!!!!"
             return
         if self.agentListIndex == self.onReceiveDecision[0]: #this is the agent to go to ball
             if self.worldRef.fieldBall.inPosession == False:
@@ -354,10 +354,10 @@ class testingCode(unittest.TestCase):
         correctAnswer1 = [((math.cos(50 * math.pi / 180)), (math.sin(50 * math.pi/180))),
                           ((math.cos(40 * math.pi / 180)), (math.sin(40 * math.pi/180)))]
         """
-        print("answer")
-        print(answer)
-        print("correct")
-        print(correctAnswer1)
+        print "answer"
+        print answer
+        print "correct"
+        print correctAnswer1
         """
         for i in range(len(correctAnswer1)):
             for j in range(len(correctAnswer1[i])):
@@ -373,8 +373,8 @@ class testingCode(unittest.TestCase):
         #intialize agent to position 25,25 with no noise/error, as a keeper, with (357/2, 550/2) as center of field,
         #and 2 as agent speed, and 3 as ball speed
         Agent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
-        print("These are the cosines of interest, printed in ", self)
-        print(Agent.cosinesOfInterest)
+        print "These are the cosines of interest, printed in ", self 
+        print Agent.cosinesOfInterest 
         cos5 = math.cos(5.0 * math.pi / 180) #cosine of 3 degress. angle needs to be in radians
         #Agent.receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
         testBall = ball.ball((25,25), 3, True)
@@ -398,7 +398,7 @@ class testingCode(unittest.TestCase):
         #intialize agent to position 25,25 with no noise/error, as a keeper, with (357/2, 550/2) as center of field,
         #and 2 as agent speed, and 3 as ball speed
         testAgent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
-        #print("display height: ", testAgent.worldRef.display_height)
+        #print "display height: ", testAgent.worldRef.display_height
         rows = [53.55, 103.53, 153.51, 203.49, 253.47]
         cols = [82.5, 159.5, 236.5,  313.5, 390.5]
         testPoints = testAgent.getOpenPoints
@@ -412,8 +412,8 @@ class testingCode(unittest.TestCase):
         keepAwayWorld = keepAway.keepAway()
         Agent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
         anglesToTest = list(range(5, Agent.terminalPassAngle, Agent.passAngleGranularity))
-        print("these are the angls to test:")
-        print(anglesToTest)
+        print "these are the angls to test:" 
+        print anglesToTest 
         for i in range(len(Agent.cosinesOfInterest)):
             self.assertAlmostEqual(Agent.cosinesOfInterest[i], math.cos(anglesToTest[i] * math.pi / 180) )
         
@@ -421,5 +421,5 @@ class testingCode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print ('Unit Testing')
+    print  'Unit Testing' 
     unittest.main()

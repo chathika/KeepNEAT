@@ -9,7 +9,7 @@ import random
 #output: true if the dimensions are the same, false otherwise
 def doDimMatch(a, b):
     if len(a) != len(b):
-        print("dimensions do not match")
+        print "dimensions do not match" 
         return False
     return True
 
@@ -33,7 +33,7 @@ def getSqrDist(a, b):
             total += vector[i] * vector[i]
         return total
     else:
-        print("error, dimensions don't match for getSqrDist(", a, ",", b, ")")
+        print "error, dimensions don't match for getSqrDist(", a, ",", b, ")" 
 
 
 #UNIT TESTED
@@ -244,6 +244,6 @@ class testingCode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print ('Unit Testing')
+    print  'Unit Testing' 
     unittest.main()
     

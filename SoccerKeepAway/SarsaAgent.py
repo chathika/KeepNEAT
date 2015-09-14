@@ -148,7 +148,7 @@ class SarsaAgent(agent):
         elif self.worldDescription[row][col]== 1:
             return True
         else:
-            print("error in isRandPosInBlock function")
+            print "error in isRandPosInBlock function"
             return True
 
     def training(self):
@@ -156,7 +156,7 @@ class SarsaAgent(agent):
         numTraining = 800
         count = 0
         while count <= numTraining:
-            print("Current episode: ", count)
+            print "Current episode: ", count 
             iterations = 0
             """"
             if count%16 == 0:
@@ -184,7 +184,7 @@ class SarsaAgent(agent):
             #self.setEpsilon(self.epsilon - 0.004)
             self.printQVals(self.getAllQvalues(), False)
             count += 1
-            #print(self.getQValue((7,5), "down"))
+            #print self.getQValue((7,5), "down")
             
 
     def testing(self):
@@ -199,13 +199,13 @@ class SarsaAgent(agent):
             self.agentx, self.agenty = self.moveAttempt(action, self.agentx, self.agenty, self.pointsHistory)
             self.printQVals(self.getAllQvalues(), True)
             """
-            print()
-            print("Comparision")
-            print(state, ", " , self.getQValue(state, "up"))
-            print(len(self.getAllQvalues()))
-            print(len(self.getAllQvalues()[0] ))
-            print(len(self.getAllQvalues()[0][0] ))
-            print(state, ", ", self.getAllQvalues()[ state[0] ][ state[1] ][0])
+            print
+            print "Comparision"
+            print state, ", " , self.getQValue(state, "up")
+            print len(self.getAllQvalues())
+            print len(self.getAllQvalues()[0] )
+            print len(self.getAllQvalues()[0][0] )
+            print state, ", ", self.getAllQvalues()[ state[0] ][ state[1] ][0]
             """
             state = self.getState()
                 
@@ -262,10 +262,10 @@ class SarsaAgent(agent):
                     #pick the keeper with minimum cos value
                     if (self.stateVariables[11] < self.stateVariables[12]):
                         #k2 is a better option
-                        print("pass to keeper 2")
+                        print "pass to keeper 2"
                         self.passBall(1)
                     else:
-                        print("pass to keeper 3")
+                        print "pass to keeper 3"
                         self.passBall(2)
 
 

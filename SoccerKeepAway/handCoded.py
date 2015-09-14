@@ -55,10 +55,10 @@ class handCoded(agent.agent):
                     #pick the keeper with minimum cos value
                     if (self.stateVariables[11] < self.stateVariables[12]):
                         #k2 is a better option
-                        print("pass to keeper 2")
+                        print "pass to keeper 2" 
                         self.passBall(1)
                     else:
-                        print("pass to keeper 3")
+                        print "pass to keeper 3" 
                         self.passBall(2)
                 """
                 #this is some other hand coded stuff that you read in stone's paper

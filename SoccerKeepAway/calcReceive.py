@@ -17,11 +17,11 @@ def calc_receive(worldRef, inputDirection = None):
         
     #you're either calculating a hypothetical pass, or the actual pass
     if inputDirection == None:
-        print("calc recieve for ball. ")
+        print "calc recieve for ball. "
         if(worldRef.fieldBall.trueBallDirection == (0.0, 0.0)):
-            print("ball is stationary")
+            print "ball is stationary" 
         else:
-            print("ball is moving")
+            print "ball is moving" 
         inputDirection = worldRef.fieldBall.trueBallDirection
     
     if(inputDirection == (0.0, 0.0))== False:
@@ -54,7 +54,7 @@ def calc_receive_ball_moving(worldRef, inputDirection, posessingKeeperIndex):
         #TC is the position of the keeper who's figuring out if he should goToBall(), or getOpen()
         TC = worldRef.keeperArray[i].true_pos
         if (kUtil.cosTheta(TA, TB, TC)) < 0:
-            #print("Keeper " , i, " can't get to ball: the cosTheta is negetive.")
+            #print "Keeper " , i, " can't get to ball: the cosTheta is negetive."
             #it's impossible for this keeper to get the ball
             continue 
         else:
@@ -66,7 +66,7 @@ def calc_receive_ball_moving(worldRef, inputDirection, posessingKeeperIndex):
             bt = bd/worldRef.maxBallSpeed
             if pt > bt:
                 #keeper wont' be able be able to get to ball in time
-                #print("player ", i+1, "can't reach ball as pt:",pt," and bt: ",bt)
+                #print "player ", i+1, "can't reach ball as pt:",pt," and bt: ",bt 
                 continue
             else:
                 #keeper CAN get to ball. can it get there soonest though?
@@ -81,7 +81,7 @@ def calc_receive_ball_moving(worldRef, inputDirection, posessingKeeperIndex):
         rDecision = [argmin, calcOptimal(worldRef, worldRef.keeperArray, argmin, bestPerpIntersect)]
         return rDecision
     else:
-        print("no argmin found. game about to crash for sure")
+        print "no argmin found. game about to crash for sure"
         return None
             
 #once an agent is determined to be the one in best position to get to the ball, then 
@@ -91,7 +91,7 @@ def calc_receive_ball_moving(worldRef, inputDirection, posessingKeeperIndex):
 def calcOptimal(worldRef, agentList, i, intersect):
     #if the intersect is in bounds, just go to it. no calculations needed
     if isPointOutOfPlayRegion(worldRef, intersect, agentList, i) == False:
-        print("point in bounds, return intersect")
+        print "point in bounds, return intersect" 
         return intersect
         
     #V = vector from agent's perpendicular intercept to the ball
@@ -123,10 +123,10 @@ def calcOptimal(worldRef, agentList, i, intersect):
             return optimalPoint
         """
         if isPointOutOfPlayRegion(worldRef, optimalPoint, agentList, i) == False:
-            print("Optimal found, returning optimal point:", optimalPoint)
+            print "Optimal found, returning optimal point:", optimalPoint 
             return optimalPoint
     #if you get here, then no closer optimal was found
-    print("no optimal found, returning intersect", intersect)
+    print "no optimal found, returning intersect", intersect 
     return intersect
     
 #simple function to check if a point is outside of the playable region defined by the player
@@ -137,7 +137,7 @@ def isPointOutOfPlayRegion(worldRef, pointOfInterest, agentList, agentIndex):
     colPixel1 = pointOfInterest[1]
     rowPixel2 = rowPixel1 + worldRef.agent_block_size
     colPixel2 = colPixel1 + worldRef.agent_block_size
-    #print("rowPixel1:", rowPixel1, " colPixel1: ", colPixel1, " rowPixel2:", rowPixel2, " colPixel2:",colPixel2)
+    #print "rowPixel1:", rowPixel1, " colPixel1: ", colPixel1, " rowPixel2:", rowPixel2, " colPixel2:",colPixel2 
     #check to see if you go outside the boundaries of the game    
     if rowPixel1 < topLeft[0] or colPixel1 < topLeft[1] or rowPixel2 > bottomRight[0] -1 or colPixel2 > bottomRight[1] - 1:  
         return True

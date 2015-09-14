@@ -98,8 +98,8 @@ class keepAway():
         self.gameDisplay.blit(text, [0,0])        
     def pause(self, message):
         paused = True
-        print(message)
-        print("Press space to continue. Press E to exit")
+        print message 
+        print "Press space to continue. Press E to exit" 
         while paused:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -182,14 +182,14 @@ class keepAway():
         #noiseFreeDirectionVector is a unit vector or not
         quad = self.getQuadAttemptingToMoveTo(inputAgent, noiseFreeDirectionVector)
         setOfLegalQuads = self.getLegalQuadrants(inputAgent)
-        #print(setOfLegalQuads)
-        #print("quad:", quad)
+        #print setOfLegalQuads 
+        #print "quad:", quad
         if quad in setOfLegalQuads:
             #move is legal, do it
             self.moveAgent(inputAgent, kUtil.scalarMultiply ( distance, kUtil.unitVector(noiseFreeDirectionVector)))
         else:
             #move is illegal. Simply return without calling or updating anything
-            #print("Illegal move: ", reversedPolarCoord)
+            #print "Illegal move: ", reversedPolarCoord 
             return False
         if kUtil.magnitude(noiseFreeDirectionVector) == 0.0:
             return False
@@ -207,7 +207,7 @@ class keepAway():
         y = noiseFreeDirectionVector[0]
         x = noiseFreeDirectionVector[1] 
         angleInRadians = math.atan2(y,x)
-        #print("angleInRadians:", angleInRadians, " for y = ", y, "and x = ", x)
+        #print "angleInRadians:", angleInRadians, " for y = ", y, "and x = ", x 
         quadrantToMoveTo = None
         if angleInRadians >= 0.0 and angleInRadians <= math.pi / 2.0:
             #this is quadrant 0
@@ -267,7 +267,7 @@ class keepAway():
         
         #check to see if you go outside the boundaries of the game    
         if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.display_height or colPixel2 > self.display_width :
-            #print("upper left coordinates: ", (rowPixel1, colPixel1))  
+            #print "upper left coordinates: ", (rowPixel1, colPixel1) 
             return False
         #if you're not outside boundaries, then it's a totally legal direction. It just might not be optimal
         else:
@@ -362,8 +362,8 @@ class keepAway():
             if self.agentBallIntersection(self.takerArray[i]):
                 self.takerArray[i].inPosession = True
                 self.fieldBall.updatePosession(True)
-                #print("taker ", i, "has ball at taker true coordinate:", self.takerArray[i].true_pos)
-                #print("ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size))
+                #print "taker ", i, "has ball at taker true coordinate:", self.takerArray[i].true_pos
+                #print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
                 return
             else:
                 self.takerArray[i].inPosession = False
@@ -377,8 +377,8 @@ class keepAway():
                     self.keeperArray[i].inPosession = True
                     self.fieldBall.updatePosession(True)
                     return
-                #print("keeper ", i, "has ball at keeper true coordinate:", self.keeperArray[i].true_pos, " to ", (self.keeperArray[i].true_pos[0] + self.agent_block_size, self.keeperArray[i].true_pos[1] + self.agent_block_size) )
-                #print("ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size))
+                #print "keeper ", i, "has ball at keeper true coordinate:", self.keeperArray[i].true_pos, " to ", (self.keeperArray[i].true_pos[0] + self.agent_block_size, self.keeperArray[i].true_pos[1] + self.agent_block_size)
+                #print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
             else:
                 #this is the case where the agent IS kicking
                 #check to see if the agent is intersecting the ball
@@ -395,16 +395,16 @@ class keepAway():
     #this is more or less a private fucntion of self.updateBallPosession()
     #check for the intersection of an agent and a ball
     def agentBallIntersection(self, inputAgent):
-        #print()
+        #print
         agentRadius = self.agent_block_size / 2
         ballRadius = self.ball_block_size / 2
         cutoff = agentRadius+ ballRadius
         agentMidPoint = kUtil.addVectorToPoint(inputAgent.true_pos, (self.agent_block_size/2, self.agent_block_size/2))
         ballMidPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, (self.ball_block_size/2, self.ball_block_size/2))
-        #print("agent actual:", inputAgent.true_pos, "agentMid:", agentMidPoint)
-        #print("agentMid:", agentMidPoint, " ballMid:", ballMidPoint)
+        #print "agent actual:", inputAgent.true_pos, "agentMid:", agentMidPoint
+        #print "agentMid:", agentMidPoint, " ballMid:", ballMidPoint
         distBetweenMidPoints = kUtil.getDist(agentMidPoint, ballMidPoint)
-        #print("Cutoff: ", cutoff, " actual Distance: ", distBetweenMidPoints)
+        #print "Cutoff: ", cutoff, " actual Distance: ", distBetweenMidPoints
         if (distBetweenMidPoints <= cutoff):
             return True
         else:
@@ -426,8 +426,8 @@ class keepAway():
             
     def sendCalcReceiveDecision(self):
         rDecision = calcReceive.calc_receive(self)
-        print("rDecision decided upon:")
-        print(rDecision)
+        print "rDecision decided upon:"
+        print rDecision
         for i in range(len(self.keeperArray)):
             self.keeperArray[i].receiveDecision(rDecision)
         for i in range(len(self.takerArray)):
@@ -539,7 +539,7 @@ class keepAway():
             
             if self.isGameOver() == True:
                 gameExit = True
-                print("final score: ", self.keeperScore)
+                print "final score: ", self.keeperScore 
             #this specifies frames per second
             self.clock.tick(self.test_fps)
         self.finish()
