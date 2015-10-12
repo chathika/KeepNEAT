@@ -443,7 +443,7 @@ class agent():
             predictedBallPos = self.noisyBallPos
         else:
             predictedBallPos = self.onReceiveDecision[1]
-        for point in self.__getOpenPoints:
+        for point in self.getOpenPoints:
             safety = max(kUtil.cosTheta(point, predictedBallPos, self.takerArray[0].get_noisy_pos()),
                          kUtil.cosTheta(point, predictedBallPos, self.takerArray[1].get_noisy_pos()))
             if (safety > safetyConstant):
