@@ -1,14 +1,56 @@
+"""
+This module contains the agent class. 
+"""
 import kUtil, pickle, os, math, unittest, ball
-import calcReceive
-import pygame
 
 class agent():
+    """
+    The agent Class
+    
+    The agent class contains all the core functionality of the agent. All of the
+    intelligence or hand coded agents will go and inherit this class. 
+    
+    :param worldRef: this is a reference to the simulator class. agent will
+        only be allowed to access the public methods in the simulator. It will
+        in no way be able to modify simulator values
+    :param simIndex: The simulator that the agent keeps track of the agent in an array. 
+        The simIndex is the index position of this agent in the simulators array. This 
+        variable will help the simulator keep track of the agent
+    :param noisy_pos: The agent shouldn't know it's exact position in the simulator, so
+        a noisy position is given to it. noisy_pos is a noisy reading of the agent's 
+        position on the field. 
+    :param sigma: this is the value that sets how noisy the agents readings of it's position 
+        is, as well as the positions of the other players, as well as how accurate 
+        its perception of where the ball is. 
+    :param agentType: indicates if the is a keeper or a taker. Set agentType to "keeper" for 
+        keepers, and "taker" for takers. 
+    :param noisyBallPos: This is a noisy coordinate for the position of the ball on the 
+        field. 
+    :param maxPlayerSpeed: This indicates how fast the agent is allowed to move on the field.
+        This value is typically set to 2, for 2 pixels per time step. 
+    :param maxBallSpeed: This indicates how fast the ball is allowed to move on the field. 
+        This value is typically set to 3, for 3 pixels per time step. The value of maxBallSpeed 
+        should be higher than that of maxPlayerSpeed.
+    :param inPossession: This is an optional parameter that indicates if the player is currenly in
+        possession of the ball. Default value is false.
+    
+        
+    :type worldRef: keepAway
+    :type simIndex: integer
+    :type noisy_pos: tuple or list of floats 
+    :type sigma: float
+    :type agentType: string set to either "keeper" or "taker"
+    :type noisyBallPos: tuple or list of floats 
+    :type maxPlayerSpeed: integer
+    :type maxBallSpeed: integer
+    :type inPossession: boolean
+    """
     #initial parameters: XY position, the sigma for calculating noise, and type "keeper" or "taker"
-    def __init__(self, worldRef, pos, sigma, agentType, trueBallPos, maxPlayerSpeed, maxBallSpeed, inPossession = False):
-        self.sigma = sigma
-        self.true_pos = pos
-        self.noisy_pos = kUtil.getNoisyVals(self.true_pos, self.sigma)
-        self.agentType = agentType
+    def __init__(self, worldRef, simIndex, noisy_pos, sigma, agentType, noisyBallPos, maxPlayerSpeed, maxBallSpeed, inPossession = False):
+        self.__sigma = sigma
+        self.__simIndex = simIndex #sim index = agent's index in the simulator array
+        self.__noisy_pos = noisy_pos
+        self.__agentType = agentType #definitely make this info available to simulator
         self.maxPlayerSpeed = maxPlayerSpeed
         self.keeperArray = None
         self.takerArray = None
@@ -18,7 +60,7 @@ class agent():
         self.worldRef = worldRef
         
         #BALL VARIABLES
-        self.noisyBallPos = kUtil.getNoisyVals(trueBallPos, self.sigma)
+        self.noisyBallPos = noisyBallPos
         self.maxBallSpeed = maxBallSpeed
         self.fieldBall = None
         self.inPosession = False
@@ -26,15 +68,15 @@ class agent():
         
         #go and initialize the variables used for getOpen and passBall
         portionOfBorderToStayAwayFrom = 0.15
-        self.getOpenPoints = self.initializeGetOpenGrid(portionOfBorderToStayAwayFrom)
+        self.getOpenPoints = self.__initializeGetOpenGrid(portionOfBorderToStayAwayFrom)
         #the playable region is bound by a top left and a bottom right coordinate.
         #    these coordinates define a rectangle that the agents will try to stay in:
         #    when an agent passes the ball, it makes sure it's team mate can get the ball
         #    at the edge of the boundary
         self.playableRegionTopLeft = (self.worldRef.display_height * portionOfBorderToStayAwayFrom/2, 
-                                    self.worldRef.display_width * portionOfBorderToStayAwayFrom/2)
+                                    self.worldRef.get_display_width() * portionOfBorderToStayAwayFrom/2)
         self.playableRegionBottomRight = (self.worldRef.display_height - self.playableRegionTopLeft[0],
-                                          self.worldRef.display_width - self.playableRegionTopLeft[1])
+                                          self.worldRef.get_display_width() - self.playableRegionTopLeft[1])
         
         #initialize the cosines of interest for getting rotated vectors
         self.cosinesOfInterest = []
@@ -48,105 +90,191 @@ class agent():
     #used by keepaway.py go give the agent a direct reference to the ball object. 
     #agent will need this reference in order to set the ball's velocity if the agent ever gains posession
     def receiveBallReference(self, inputBall):
+        """
+        This function gives the agent a reference to the field ball. 
+        
+        :param inputBall: this is the ball that the agent is getting a
+            reference to. This function should only be called from the
+            simulator class. 
+        
+        :type inputBall: ball
+        
+        :returns: no return
+        """
         self.fieldBall = inputBall
     
     #this function will only be used by keepaway.py to update some initial variables that couldn't be updated
     #in __init__
     def receiveListOfOtherPlayers(self,  keeperArray, takerArray,index):
+        """
+        This function gives the agent a reference to the simulators array
+        of keepers and takers. The index that is being input is value from
+        0 to 2, and indicates how relatively close the agent is to the ball.
+        
+        :param keeperArray: This is the array of keepers from the simulator
+        :param takerArray: This is the array of takers from the simulator
+        :param index: the index is a value given to the agent indicating just
+            how close this agent is to the ball. For example, if an index of 0 is given, 
+            then that means this agent is the closest keeper/taker to the ball.
+        
+        :type keeperArray: List or Tuple of agents
+        :type takerArray: List or Tuple of agents
+        :type index: integer or float
+        
+        :returns: no return
+        """
         self.takerArray = takerArray
         self.keeperArray = keeperArray
         self.agentListIndex= index #index in either the taker list or keeper list
         
     #used only in keepaway.py
     #When the world calculates the state variables, the agent will get a noisy copy of them
-    def receiveStateVariables(self, variables):
-        self.stateVariables = kUtil.getNoisyVals(variables, self.sigma)
+    def receiveSimpleStateVariables(self, noisyVariables):
+        """
+        The simulator will call this function in order to give the agent class
+        a noisy version of the simple state variables
+        
+        :param noisyVariables: This is the array containing the noisy version
+            of the simple state variables. 
+        
+        :type noisyVariables: tuple or list of numbers
+        
+        :returns: no return
+        """
+        self.stateVariables = noisyVariables
         
     #used only in keepaway.py   
     def receiveDecision(self, rDecision):
+        """
+        The simulator will call this function in order to give the agent class
+        a noisy version of the receive decision. The receive decision is just a 
+        tuple of 2 values: (argmin, point_to_run_to). the argmin is the index of
+        the keeper, indicating which keeper is in the best position to acquire the 
+        ball. The point_to_run_to is the point that this keeper must run to in order
+        to acquire the ball. More details about how the receieve decision is calculated
+        can be found in the calcReceive module. 
+        
+        :param rDecision: a tuple containing the index of the keeper that's in the 
+            best position to intercept the ball, and the coordinate that the keeper
+            needs to go and run to. The coordinates that are received from the 
+            simulator have some noise added to it. 
+        
+        :type rDecision: tuple containing an integer and a 2D coordinate
+        
+        :returns: no return
+        """
         self.onReceiveDecision = rDecision
-        self.onReceiveDecision[1] = kUtil.getNoisyVals(self.onReceiveDecision[1], self.sigma)
     
     #used only in keepaway.py. Only keepaway.py is allowed to actually change positions of agents
     #agents only have the power to request movements
-    def updateAgentPosition(self, truePosition):
-        self.true_pos = truePosition
-        self.noisy_pos = kUtil.getNoisyVals(truePosition, self.sigma)
+    def updateAgentPosition(self, noisyPosition):
+        """
+        The simulator will call this function in order to update the noisy position
+        of the agent. Noisy positions are used by the different agents for all
+        of the calculates that take place at the agent level. The simulator 
+        calculates things with the true positions, and the true positions are kept
+        private from the agent classes. 
+        
+        :param noisyPosition: This is a coordinate with a noisy reading of the
+            agent's current position.
+        
+        :type noisyPosition: tuple or list of numbers
+        
+        :returns: no return
+        """
+        self.__noisy_pos = noisyPosition
     
     #for keepers, go to the intersection, or optimal point
     #for takers, just go to the ball
     #note: this returns a movement vector that must be implemented in keepaway
-    def goToBall(self):
+    def __goToBall(self):
+        """
+        If a keeper is calling this method, then this method will make the keeper
+        run directly towards the ball if the ball is stationary. If the ball is 
+        not stationary, then the simulator will use the calcReceieve methods in 
+        order to calculate the optimal intersection point that the keeper can 
+        run to. The keeper will then run towards that intercept point using 
+        this function. The only keeper that should be running to the ball is 
+        the keeper that can get to the ball the fastest. all other keepers should
+        be implementing the getOpen() function. 
         
-        if (self.agentType == "keeper"):
-            V = kUtil.getVector(self.noisy_pos, self.onReceiveDecision[1])
-            minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.noisy_pos, self.onReceiveDecision[1]))
+        For a taker, the taker will simply run towards the ball. The taker that is 
+        closest to the ball should call this function, while the taker that is farther
+        should try to block a pass with blockPass method.
+        
+        :returns: no return
+        
+        .. note::
+            For keepers, this function will use information that is set when the simulator calls
+            the agent method receiveDecision. Do not call __goToBall for a keeper unless that
+            simulator function has been called. 
+
+        """
+        if (self.__agentType == "keeper"):
+            V = kUtil.getVector(self.__noisy_pos, self.onReceiveDecision[1])
+            minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, self.onReceiveDecision[1]))
         else:
             #you have a taker. have him be stupider by going to the ball rather than the intersection point
-            V = kUtil.getVector(self.noisy_pos, self.noisyBallPos)
-            minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.noisy_pos, self.noisyBallPos))
+            V = kUtil.getVector(self.__noisy_pos, self.noisyBallPos)
+            minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, self.noisyBallPos))
         
         #these 2 lines of code are for if you want keepers and takers to go to same location
         #this is the more challenging case as the taker will predict where the ball intersects
         """
-        V = kUtil.getVector(self.noisy_pos, self.onReceiveDecision[1])
-        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.noisy_pos, self.onReceiveDecision[1]))
+        V = kUtil.getVector(self.__noisy_pos, self.onReceiveDecision[1])
+        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, self.onReceiveDecision[1]))
         """
         
         self.worldRef.moveAttempt(self, (V, minDist))
         #return (V, self.maxPlayerSpeed)
-        
-    
-    #given this agent's current position, check and see if a point is currently
-    #inside the agent boundaries. If it is, return true. if not, return false
-    #This function will be used to see if the soccer ball will end up inside the 
-    #agent if the agent were to just hold his/her ground
-    def agentCurrentlyInPoint(self, point):
-        row1 = agent.noisy_pos[0]
-        col1 = agent.noisy_pos[1]
-        row2 = row1 + self.worldRef.agent_block_size
-        col2 = col1 + self.worldRef.agent_block_size
-        if (point[0] >= row1 and point[0] <= row2):
-            if (point[1] >= col1 and point[1] <= col2):
-                return True
-        return False
-        
+               
     
     #just hold your ground and return        
     def holdBall(self):
+        """
+        If a keeper currently has the ball, then it has the option to hold the ball,
+        or pass it. Call this function to hold the ball. Holding the ball means the
+        agent holding the ball cannot move.
+        
+        :returns: no return
+        """
         if self.fieldBall == None:
-            print "ERROR: trying to hold ball without actually having  ball" 
+            print ("ERROR: trying to hold ball without actually having  ball") 
         return
     
-    #just a temporary function to draw the vectors that are being calculated for debugging purposes
-    def debugPassVectors(self, startPoint, vectors):
-        self.worldRef.drawWorld ()
-        self.worldRef.displayScore()
-        print "Starting point: ", startPoint 
-        for vector in vectors:
-            newVector = kUtil.addVectorToPoint(startPoint, kUtil.scalarMultiply(5, vector))
-            print "printing vector: ", newVector
-            self.worldRef.gameDisplay.blit(self.worldRef.debugYellowDotImage, (newVector[1], newVector[0]))
-        self.worldRef.gameDisplay.blit(self.worldRef.debugRedDotImage, (startPoint[1], startPoint[0]))
-        pygame.display.update()
-        print "debugging"
             
     #only keeper 0 will have this option available
     def passBall(self, integerK):
-        print "passing to team mate ", integerK +1
+        """
+        If a keeper currently has the ball, then it has the option to hold the ball,
+        or pass it. Call this function to pass the ball. integerK represents the 
+        keeper that the ball holder is passing to. integerK = 1 means pass to the 
+        keeper that is closest to the ball besides the ball holder. integerK = 2
+        means pass to the 2nd closest, and so on.
+        
+        :param integerK: this represents the 
+            keeper that the ball holder is passing to. integerK = 1 means pass to the 
+            keeper that is closest to the ball besides the ball holder. integerK = 2
+            means pass to the 2nd closest, and so on.
+        
+        :type integerK: integer
+        
+        :returns: no return 
+        """
+        print("passing to team mate ", integerK +1)
         #if you're passing to integerK = 1, then that means pass to the keeper that's closer to you
         #if you're passing ot integerK = 2, then that means pass to the keeper that's farther to you
         #0 is an invalid input
         sortedKeepers = sorted(self.keeperArray)
         if integerK == 0:
-            print "Invalid input for integerK! integerK not allowed to be", integerK
+            print("Invalid input for integerK! integerK not allowed to be", integerK)
             return
         if self.fieldBall == None:
-            print "ERROR: trying to hold ball without actually having  ball"
+            print("ERROR: trying to hold ball without actually having  ball")
             return
         
         #pass to team mate integerK. if integerK = 1, then it's the 2nd element in array
-        selfToTeammateDirection = kUtil.unitVector(kUtil.getVector(self.noisyBallPos, sortedKeepers[integerK].noisy_pos))
+        selfToTeammateDirection = kUtil.unitVector(kUtil.getVector(self.noisyBallPos, sortedKeepers[integerK].get_noisy_pos()))
         selfToTeammateVector = (kUtil.scalarMultiply(self.fieldBall.maxBallSpeed, selfToTeammateDirection))
         
         """
@@ -155,9 +283,9 @@ class agent():
         passVectorsToConsider = []
         passVectorsToConsider.append(selfToTeammateDirection)
         for i in range(len(self.cosinesOfInterest)):
-            passVectorsToConsider = passVectorsToConsider + self.getRotatedVectors(selfToTeammateDirection, self.cosinesOfInterest[i])
+            passVectorsToConsider = passVectorsToConsider + self.__getRotatedVectors(selfToTeammateDirection, self.cosinesOfInterest[i])
         #now sort the vectors based on how open they are:
-        self.debugPassVectors(ballPos, passVectorsToConsider)
+        self.worldRef.debugPassVectors(ballPos, passVectorsToConsider)
         passVectorsToConsider = sorted(passVectorsToConsider, 
                                        key = lambda vector: max ( kUtil.cosTheta(self.worldRef.takerArray[0].getNoisyMidPoint(), ballPos, kUtil.addVectorToPoint(ballPos, vector)), 
                                                                   kUtil.cosTheta(self.worldRef.takerArray[1].getNoisyMidPoint(), ballPos, kUtil.addVectorToPoint(ballPos, vector))),
@@ -177,7 +305,7 @@ class agent():
         self.inPosession = False
         self.isKicking = True
         #kUtil.addVectorToPoint(self.fieldBall.trueBallPos, selfToTeammateVector)
-        self.fieldBall.update(kUtil.getNoisyVals(selfToTeammateVector, self.sigma))
+        self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTeammateVector, self.__sigma))
         #self.fieldBall.updatepos( kUtil.addVectorToPoint(self.fieldBall.true_pos, selfToTeammateVector ) )
         #return (selfToTeammateDirection, self.maxBallSpeed)
     
@@ -186,7 +314,37 @@ class agent():
     #you wanted the 2 vectors that you get when you rotate that vector 5 degrees in either direction,
     #then use this function. The formula from this function was derived from a dot b = mag(a)*mag(b)cosTheta
     #and the contrant that bx^2 + by^2 = 1 if b is a unit vector
-    def getRotatedVectors(self, vector, cos_k):
+    def __getRotatedVectors(self, vector, cos_k):
+        """
+        FUNCTION NOT USED IN FINAL IMPLEMENTATION
+        
+        This function will calculate 2 other angles that the agent can kick the ball to. If 
+        the agent has calculated a direct path from itself to another keeper, that should be
+        the input vector. If the agent is interested in passing at a 5 degree angle, then
+        the 2nd input should be the cosine of 5 degrees. This function will then calculate 
+        and return the 2 unit vectors which are the vectors pointing at 5 degree angles 
+        
+        :param vector: the vector that points directly from the  ball's noisy 
+            position to the noisy position of the keeper the agent wants to pass to
+        :param cos_k: the cosine of the angle that the agent wants to pass at. The
+            reason cosine is used instead of the angle is for computational efficiency
+        
+        :type vector: list or tuple of numbers
+        :type cos_k: number
+        
+        :returns: a list of 2 unit vectors, each one representing the 2 directions that
+            the ball can be kicked to achieve the desired angle.
+            
+        :rtype: list of tuples
+        
+        :Example:
+    
+            >>> a = (1, 0)
+            >>> b = (0, 0)
+            >>> c = (1, 1)
+            >>> print(posSinTheta(a,b,c))
+            0.70710678118654752440084436210485
+        """
         discriminantIsZero = False
         terminalPosCosZero = kUtil.addVectorToPoint(self.noisyBallPos, vector) 
         vector = kUtil.unitVector(vector)
@@ -223,13 +381,36 @@ class agent():
     #getOpen() needs to consider a very limited amount of points. 
     #this function should be called in initialization to go and defined the 
     #list of all points that getOpen will check 
-    def initializeGetOpenGrid(self, portionOfBorderToStayAwayFrom):
+    def __initializeGetOpenGrid(self, portionOfBorderToStayAwayFrom):
+        """
+        the agent.__getOpen() needs to consider a very limited amount of points for 
+        computational efficiency. this function should be called during an agents
+        initialization. When called, this function will go and define the 
+        list of the 25 points that getOpen will check, arranged in a 5x5 grid
+        
+        :param portionOfBorderToStayAwayFrom: When assigning points on the field
+            to check, the agent will not consider areas close to the border. For 
+            example, assume that 
+            portionOfBorderToStayAwayFrom = .15, and the height and width of the
+            field are both 100px. Then none of the 25 points will be in top 15 
+            rows of pixels, nor the bottom 15 rows of pixels. The same goes for 
+            the 15 leftmost columns of pixels, and the rightmost 15 columns of
+            pixels. The 5x5 grid of points to consider will be evenly spaced out
+            and laid in the 70 pixel by 70 pixel center. 
+        
+        :type portionOfBorderToStayAwayFrom: a float > 0 but < 1
+        
+        :returns: a list containing the 25 coordinates of points to consider for
+            the agent.__getOpen() function
+        
+        :rtype: a list of coordinates. each coordinate is a tuple of floats
+        """
         #portionOfBorderToStayAwayFrom specified which percent of the boarder
         #to ignore. So it you migth end up ignoring 15% of the border
         #The rest of the area, split it into 25 points, going 5x5
-        cutoffWidth = self.worldRef.display_width * portionOfBorderToStayAwayFrom
+        cutoffWidth = self.worldRef.get_display_width() * portionOfBorderToStayAwayFrom
         cutoffHeight = self.worldRef.display_height * portionOfBorderToStayAwayFrom
-        widthIncrement = (self.worldRef.display_width - (2 * cutoffWidth)) / 5.0
+        widthIncrement = (self.worldRef.get_display_width() - (2 * cutoffWidth)) / 5.0
         heightIncrement = (self.worldRef.display_height - (2*cutoffHeight)) / 5.0
         returnList = []
         for i in range(5):
@@ -240,7 +421,20 @@ class agent():
         return returnList
             
     
-    def getOpen(self):
+    def __getOpen(self):
+        """
+        This function implements a hand coded procedure to go and place individual agents
+        in an optimal position to receive a pass. The code for this function is 
+        based heavily on "Algorithm 2 GetOpen:Hand-coded", which is the pseudo-code
+        for the getOpen function used by some other researchers and was published 
+        here:
+        http://www.cs.utexas.edu/users/pstone/Papers/bib2html-links/LNAI09-kalyanakrishnan-1.pdf
+        
+        Only keeper who are not trying to go after the ball should call this method.
+        The decision for who goes after the ball or gets open is deterministic. 
+        
+        :returns: nothing
+        """
         #note: safety constant is cos(18.4) degrees
         safetyConstant = 0.94887601164449654493424118056447
         curMax = float("-inf")
@@ -249,9 +443,9 @@ class agent():
             predictedBallPos = self.noisyBallPos
         else:
             predictedBallPos = self.onReceiveDecision[1]
-        for point in self.getOpenPoints:
-            safety = max(kUtil.cosTheta(point, predictedBallPos, self.takerArray[0].noisy_pos),
-                         kUtil.cosTheta(point, predictedBallPos, self.takerArray[1].noisy_pos))
+        for point in self.__getOpenPoints:
+            safety = max(kUtil.cosTheta(point, predictedBallPos, self.takerArray[0].get_noisy_pos()),
+                         kUtil.cosTheta(point, predictedBallPos, self.takerArray[1].get_noisy_pos()))
             if (safety > safetyConstant):
                 #angle is too narrow, a taker can easiy steal
                 continue
@@ -263,48 +457,123 @@ class agent():
             value = 0.0
             for i in range(len(self.keeperArray)):
                 if i != self.agentListIndex:
-                    teamCongestion += 1.0 / (kUtil.getDist(self.keeperArray[i].noisy_pos, point))
+                    teamCongestion += 1.0 / (kUtil.getDist(self.keeperArray[i].get_noisy_pos(), point))
             for i in range(len(self.takerArray)):
-                oppCongestion += 1.0 / (kUtil.getDist(self.takerArray[i].noisy_pos, point))
+                oppCongestion += 1.0 / (kUtil.getDist(self.takerArray[i].get_noisy_pos(), point))
             totalCongestion = teamCongestion + oppCongestion
             value = -1.0 * totalCongestion
             if (value > curMax):
                 curMax = value
                 argMax = point
         #At this point, just run towards argMax at max speed
-        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.noisy_pos, argMax))
-        self.worldRef.moveAttempt(self, (kUtil.getVector(self.noisy_pos, argMax), minDist) )
+        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, argMax))
+        self.worldRef.moveAttempt(self, (kUtil.getVector(self.__noisy_pos, argMax), minDist) )
                     
         
     
-    def blockPass(self, kIndex):
+    def __blockPass(self, kIndex):
+        """
+        This function is implemented by the taker who is farther from the ball. 
+        
+        This function calculates the angles formed by itself, the ball, and each
+        keeper. It will then decide to block the keeper that has a bigger angle.
+        It blocks a keeper by running to the midpoint between that keeper and the ball
+        
+        :returns: nothing
+        """
         #kIndex is ordered based on who is the closest keeper
         keeperActual = sorted(self.keeperArray)
         #use the current keeper 0 position to block pass
-        midPoint = kUtil.getMidPoint(keeperActual[0].noisy_pos, keeperActual[kIndex].noisy_pos)
+        midPoint = kUtil.getMidPoint(keeperActual[0].get_noisy_pos(), keeperActual[kIndex].get_noisy_pos())
         #use the predicted keeper 0 position to block pass
         #midPoint = kUtil.getMidPoint(self.onReceiveDecision[1], keeperActual[kIndex].noisy_pos)
-        vector = kUtil.getVector(self.noisy_pos, midPoint)
-        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.noisy_pos, midPoint))
+        vector = kUtil.getVector(self.__noisy_pos, midPoint)
+        minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, midPoint))
         self.worldRef.moveAttempt(self, (vector, minDist))
         
     def receive(self):
+        """
+        This function is implemented only by keepers. Each keeper will implement
+        this in order to decide if it should run towards the ball, or if it 
+        should try to get open to receive a pass. 
+        
+        :returns: nothing
+        """
         if self.inPosession == True:
-            print "you're not supposed to be receiving you idiot, you have the ball!!!!!"
+            print("you're not supposed to be receiving you idiot, you have the ball!!!!!")
             return
         if self.agentListIndex == self.onReceiveDecision[0]: #this is the agent to go to ball
             if self.worldRef.fieldBall.inPosession == False:
-                self.goToBall()
+                self.__goToBall()
             else:
-                self.getOpen()
+                self.__getOpen()
         else:
-            self.getOpen() #get open with respect to this 
+            self.__getOpen() #get open with respect to this
+            
+    #THIS FUNCTION IS MEANT TO BE OVER RIDDEN BY EXTENION OF AGENT        
+    def decisionFunction(self):
+        """
+        This function is meant to be over ridden by children class that are
+        inheriting this method. This method is responsible for intelligence 
+        decision of whether the ballkeeper should hold the ball, or pass
+        to one of it's team mates. 
+        """
+        return
+            
+    def decisionFlowChart (self):
+        """
+        This function will control the movement of keepers and takers. It controls 
+        movement by calling on all the private movement functions that are  
+        """
+        if (self.getAgentType() == "taker"):
+            takerActual = sorted(self.takerArray)
+            if (self.agentListIndex == takerActual[0].agentListIndex):
+                #you're the closer taker so go for the ball
+                self.__goToBall()
+            else:
+                #you're the farther taker, so go and block pass to the closer keeper
+                keeperActual = sorted(self.keeperArray)
+                cos2 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
+                cos3 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
+                if cos2 > cos3:
+                    #block keeper 2
+                    self.__blockPass(1)
+                else:
+                    self.__blockPass(2)
+
+        else:
+            #the agent is a keeper
+            if(self.inPosession == False):
+                #deterministic stuff happens here
+                self.receive()
+            else:
+                self.decisionFunction()
         
     #this function is for saving the training data
     #if you have multiple agents, make the inputAgent string
     #the name of the agent. So sarsa will be "sarsa_agent" or something
     #the name is the object name, such as "dict" or whatever
     def save_obj(self, obj, name, index , inputAgent):
+        """
+        this function is for saving the training data.
+        
+        :param obj: the actual object that you're trying to save. It's usually
+            a dict object that's being saved. 
+        :param name: the name you're giving to the object you're saving. 
+            So if you're saving a dict object, you might wanna set 
+            the name to "training_dict"
+        :param index: an integer representing the agent index in the simulators 
+            agent array. example: If saving a keeper 2's dict, then index = 2. 
+        :param inputAgent: name of type of agent. Such as "sarsa_agent", 
+            or "neat_agent"
+        
+        :type obj: any object
+        :type name: string
+        :type index: integer
+        :type inputAgent: string
+        
+        :returns: nothing
+        """
         with open(inputAgent+'Obj/%d/'%index + name + '.pkl', 'wb') as f:
             pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
     
@@ -312,6 +581,26 @@ class agent():
     #if you have multiple agents, make the inputAgent string
     #the name of the agent. So sarsa will be "sarsa_agent" or something
     def load_obj(self, name, index, inputAgent ):
+        """
+        this function is for loading the saved training data. If the saved
+        training data exists, load it with pickle and return it. Otherwise,
+        return None.
+         
+        :param name: the name you're giving to the object you're saving. 
+            So if you're saving a dict object, you might wanna set 
+            the name to "training_dict"
+        :param index: an integer representing the agent index in the simulators 
+            agent array. example: If saving a keeper 2's dict, then index = 2. 
+        :param inputAgent: name of type of agent. Such as "sarsa_agent", 
+            or "neat_agent"
+        
+        :type name: string
+        :type index: integer
+        :type inputAgent: string
+        
+        :returns: either the saved data, or None
+        :rType: object or None
+        """
         fileExists = os.path.isfile(inputAgent+'obj/%d/'%index + name + '.pkl') 
         if(fileExists):
             with open(inputAgent+'obj/%d/'%index + name + '.pkl', 'rb') as f:
@@ -320,19 +609,67 @@ class agent():
             return None
     
     def getNoisyMidPoint(self):
-        return( (self.noisy_pos[0] + self.worldRef.agent_block_size) / 2.0 , (self.noisy_pos[1] + self.worldRef.agent_block_size) / 2.0 )
-    def getTrueMidPoint(self):
-        return( (self.true_pos[0] + self.worldRef.agent_block_size) / 2.0 , (self.true_pos[1] + self.worldRef.agent_block_size) / 2.0 )
-    def getNoisyBallMid(self):
-        return ((self.noisyBallPos[0] + self.worldRef.ball_block_size)/2, (self.noisyBallPos[1] + self.worldRef.ball_block_size)/2)
+        """
+        this function simply returns the midpoint of this agent.
+        
+        :returns: noisy mid point
+        :rType: tuple of integers
+        """
+        return( (self.__noisy_pos[0] + self.worldRef.get_agent_block_size()) / 2.0 , (self.__noisy_pos[1] + self.worldRef.get_agent_block_size()) / 2.0 )
+    
+    def getSigma(self):
+        """
+        this function simply returns the noise of the agent.
+        
+        :returns: noise value
+        :rType: float
+        """
+        return self.__sigma
+    
+    def getSimIndex(self):
+        """
+        this function simply returns index of the agent in the simulators 
+        corresponding array.
+        
+        :returns: agent's array index for the simuator's array. 
+        :rType: integer
+        """
+        return self.__simIndex
+    
+    def get_noisy_pos(self):
+        """
+        this function simply returns the noisy position of the agent's position on the field
+        
+        :returns: noisy agent position
+        :rType: tuple of floats
+        """
+        return self.__noisy_pos
+    
+    def getAgentType(self):
+        """
+        this function simply returns whether the agent is a keeper or taker
+        
+        :returns: either "keeper" or "taker"
+        :rType: string
+        """
+        return self.__agentType
     
     #use this if you're sorting the agents for the purpose
     #of getting the state variables
     def __lt__(self, other):
+        """
+        this function is simply used to allow comparision between different agents, so
+        that agents can be sorted. Agents are sorted based on which agent is closest to
+        the ball. So now, the simulator can call sorted(agents), and an array of all the 
+        agents is returned such that the agents are sorted based on who is closest to the ball
+        
+        :returns: if self is closer to the ball than the other agent
+        :rType: boolean
+        """
         if self.onReceiveDecision == None:
-            return kUtil.getDist(self.noisy_pos, self.noisyBallPos) < kUtil.getDist(other.noisy_pos, other.noisyBallPos)
+            return kUtil.getDist(self.__noisy_pos, self.noisyBallPos) < kUtil.getDist(other.get_noisy_pos(), other.noisyBallPos)
         else:
-            return kUtil.getDist(self.noisy_pos, self.onReceiveDecision[1]) < kUtil.getDist(other.noisy_pos, other.onReceiveDecision[1])
+            return kUtil.getDist(self.__noisy_pos, self.onReceiveDecision[1]) < kUtil.getDist(other.get_noisy_pos(), other.onReceiveDecision[1])
     
     
     
@@ -341,7 +678,7 @@ class testingCode(unittest.TestCase):
     #test case where you're at 45 degrees, and you rotate to 40 and 50 degrees
     def test_rotated_vectors(self):
         import keepAway
-        keepAwayWorld = keepAway.keepAway()
+        keepAwayWorld = keepAway.keepAway(0)
         #intialize agent to position 25,25 with no noise/error, as a keeper, with (357/2, 550/2) as center of field,
         #and 2 as agent speed, and 3 as ball speed
         Agent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
@@ -349,8 +686,8 @@ class testingCode(unittest.TestCase):
         #Agent.receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
         testBall = ball.ball((25,25), 3, True)
         Agent.receiveBallReference(testBall)
-        v = kUtil.getVector(Agent.true_pos, (30, 30)) #a vector whose angle is 45 degrees
-        answer = Agent.getRotatedVectors(v, cos5)
+        v = kUtil.getVector((25,25), (30, 30)) #a vector whose angle is 45 degrees
+        answer = Agent.__getRotatedVectors(v, cos5)
         correctAnswer1 = [((math.cos(50 * math.pi / 180)), (math.sin(50 * math.pi/180))),
                           ((math.cos(40 * math.pi / 180)), (math.sin(40 * math.pi/180)))]
         """
@@ -369,18 +706,18 @@ class testingCode(unittest.TestCase):
     #test case where you're at 0 degrees, and you rotate to 5 degrees and - 5 degrees 
     def test_rotated_vectors2(self):
         import keepAway
-        keepAwayWorld = keepAway.keepAway()
+        keepAwayWorld = keepAway.keepAway(0)
         #intialize agent to position 25,25 with no noise/error, as a keeper, with (357/2, 550/2) as center of field,
         #and 2 as agent speed, and 3 as ball speed
         Agent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
-        print "These are the cosines of interest, printed in ", self 
-        print Agent.cosinesOfInterest 
+        print("These are the cosines of interest, printed in ", self) 
+        print(Agent.cosinesOfInterest) 
         cos5 = math.cos(5.0 * math.pi / 180) #cosine of 3 degress. angle needs to be in radians
         #Agent.receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
         testBall = ball.ball((25,25), 3, True)
         Agent.receiveBallReference(testBall)
-        v = kUtil.getVector(Agent.true_pos, (25, 30)) #a vector whose angle is 0 degrees
-        answer = Agent.getRotatedVectors(v, cos5)
+        v = kUtil.getVector((25,25), (25, 30)) #a vector whose angle is 0 degrees
+        answer = Agent.__getRotatedVectors(v, cos5)
         correctAnswer1 = [((math.sin(5 * math.pi / 180)), (math.cos(5 * math.pi/180))),
                           ((math.sin(-5 * math.pi / 180)), (math.cos(-5 * math.pi/180)))]
         for i in range(len(correctAnswer1)):
@@ -412,8 +749,8 @@ class testingCode(unittest.TestCase):
         keepAwayWorld = keepAway.keepAway()
         Agent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
         anglesToTest = list(range(5, Agent.terminalPassAngle, Agent.passAngleGranularity))
-        print "these are the angls to test:" 
-        print anglesToTest 
+        print("these are the angls to test:") 
+        print(anglesToTest) 
         for i in range(len(Agent.cosinesOfInterest)):
             self.assertAlmostEqual(Agent.cosinesOfInterest[i], math.cos(anglesToTest[i] * math.pi / 180) )
         
@@ -421,5 +758,5 @@ class testingCode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print  'Unit Testing' 
+    print('Unit Testing') 
     unittest.main()

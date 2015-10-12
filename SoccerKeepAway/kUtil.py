@@ -1,3 +1,9 @@
+"""
+This is a module of static utility functions. 
+All functions have been unit and/or hand tested, and are very 
+unlikely to contain errors.
+"""
+
 import unittest
 import math
 import random
@@ -5,27 +11,89 @@ import random
 #This is a custom made util file for keepaway
 
 #UNIT TESTED
-#input: 2 vectors or coordinates, a and b
-#output: true if the dimensions are the same, false otherwise
 def doDimMatch(a, b):
+    """
+    Checks to see if the dimensionality of 2 inputs are the same
+    
+    This function will simply take vectors or coordinates, 
+    and check to see if they are the same dimensions. 
+    
+    :param a: a list or tuple representing coordinate/vector a
+    :param b: a list or tuple representing coordinate/vector b
+        
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    
+    :returns: if( numDimension(a) == numDimension(b) )
+    :rtype: boolean
+    
+    :Example:
+
+        >>> a = (12, 13, 14, 15)
+        >>> b = (1, 4, 7, 8)
+        >>> print(doDimMatch(a,b))
+        true
+    """
     if len(a) != len(b):
-        print "dimensions do not match" 
+        print("dimensions do not match") 
         return False
     return True
 
 #UNIT TESTED
-#input: take in a pair of 2D cartesian points, a and b
-#output: the vector from a to b
 def getVector(a, b):
+    """
+    Get a vector from points a to b
+    
+    This function will return a vector from point a to b. 
+    It will do this if and only if the inputs a and b
+    have the same dimensions. 
+    
+    :param a: a list or tuple representing coordinate a
+    :param b: a list or tuple representing coordinate b
+        
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    
+    :returns: vector from a to b
+    :rtype: tuple
+    
+    :Example:
+
+        >>> a = (0, 1)
+        >>> b = (1, 2)
+        >>> print(getVector(a,b))
+        (1, 1)
+    """
     if doDimMatch(a,b):
         return (b[0] - a[0], b[1] - a[1])
 
 #UNIT TESTED
-#get the squared distance between 2 points.
-#useful if all you're doing is trying to find max
-#or min distance, so you don't have to waste time
-#doing a square root operation
 def getSqrDist(a, b):
+    """
+    Get square distance from points a to b
+    
+    This function will return a float that is the
+    squared distance from points a and b, as long
+    as the dimensions match. useful if all you're doing is 
+    trying to find max or min distance, so you don't have 
+    to waste time doing a square root operation
+    
+    :param a: a list or tuple representing coordinate a
+    :param b: a list or tuple representing coordinate b
+        
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    
+    :returns: squared distance form a to b
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (0, 1)
+        >>> b = (1, 2)
+        >>> print(getSqrDist(a,b))
+        2
+    """
     if doDimMatch(a, b):
         vector =getVector(a, b)
         total = 0.0
@@ -33,23 +101,65 @@ def getSqrDist(a, b):
             total += vector[i] * vector[i]
         return total
     else:
-        print "error, dimensions don't match for getSqrDist(", a, ",", b, ")" 
+        print("error, dimensions don't match for getSqrDist(", a, ",", b, ")") 
 
 
 #UNIT TESTED
-#input: a vector
-#output: a floating point magnitude of the vector
 def magnitude(vector):
+    """
+    Get the magnitude of a vector a
+    
+    This function will return the magnitude of 
+    the input vector a
+    
+    :param vector: a list or tuple representing vector a
+        
+    :type vector: list or tuple of numbers
+    
+    :returns: the magnitude of the vector
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (15, 15)
+        >>> print(magnitude(a))
+        21.213203435596425732025330863145
+    """
     total = 0.0
     for i in range(len(vector)):
         total += vector[i] * vector[i]
     return math.sqrt(total)
 
 #UNIT TESTED
-#input: 3 points, A, B, and C.
-#output, cos(theta), where theta is the angle formed by ABC
-#note: this function WILL calculate the sign correctly
 def cosTheta (a, b, c):
+    """
+    Get cosine of the angle formed by angle ABC
+    
+    This function will return a float that is the
+    cosine of the angle formed by points ABC, where
+    B is the vertex. It returns a value between -1.0
+    and 1.0. This is implemented very efficiently, and 
+    can be used to indirectly find the max/min angle
+    
+    :param a: a list or tuple representing coordinate a
+    :param b: a list or tuple representing vertex coordinate b
+    :param c: a list or tuple representing coordinate c   
+    
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    :type c: list or tuple of numbers
+    
+    :returns: the cosine of angle formed by ABC
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (1, 0)
+        >>> b = (0, 0)
+        >>> c = (1, 1)
+        >>> print(cosTheta(a,b,c))
+        0.70710678118654752440084436210485
+    """
     V1 = getVector(b, a)
     V2 = getVector(b,c)
     V1mag = magnitude(V1)
@@ -60,22 +170,87 @@ def cosTheta (a, b, c):
         return 0.0;
 
 #UNIT TESTED
-#input: 3 points, A, B, and C.
-#output, sin(theta), where theta is the angle formed by ABC
-#note: this function will always return a positive value for sin
 def posSinTheta(a, b, c):
+    """
+    Get sine of the angle formed by angle ABC
+    
+    This function will return a float that is the
+    sin of the angle formed by points ABC, where
+    B is the vertex. It returns a value between 0.0
+    and 1.0. This is implemented very efficiently.
+    
+    :param a: a list or tuple representing coordinate a
+    :param b: a list or tuple representing vertex coordinate b
+    :param c: a list or tuple representing coordinate c   
+    
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    :type c: list or tuple of numbers
+    
+    :returns: the sine of angle formed by ABC
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (1, 0)
+        >>> b = (0, 0)
+        >>> c = (1, 1)
+        >>> print(posSinTheta(a,b,c))
+        0.70710678118654752440084436210485
+    """
     tempCos = cosTheta(a,b,c)
     return math.sqrt(1.0 - (tempCos * tempCos))
 
-#input: 2 points, a and b. 
-#return the distance
 def getDist(a,b):
-        return math.sqrt(getSqrDist(a,b))
+    """
+    Get distance from points a to b
+    
+    This function will return a float that is the
+    distance from points a and b, as long
+    as the dimensions match. 
+    
+    :param a: a list or tuple representing coordinate a
+    :param b: a list or tuple representing coordinate b
         
-#UNIT TESTED
-#input: take in a point and a vector
-#output: go and add the vector to the point to get the new point, and return it       
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    
+    :returns: distance form a to b
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (0, 1)
+        >>> b = (1, 2)
+        >>> print(getDist(a,b))
+        1.4142135623730950488016887242097
+    """
+    return math.sqrt(getSqrDist(a,b))
+        
+#UNIT TESTED     
 def addVectorToPoint(a, vector):
+    """
+    add a vector to a point
+    
+    This function will return add a vector to the point a
+    and return the value as a tuple
+    
+    :param a: a list or tuple representing coordinate a
+    :param vector: a list or tuple representing the vector you want to add to a
+        
+    :type a: list or tuple of numbers
+    :type vector: list or tuple of numbers
+    
+    :returns: a+b
+    :rtype: tuple of numbers
+    
+    :Example:
+
+        >>> a = (0, 1)
+        >>> b = (1, 2)
+        >>> print(addVectorToPoint(a,b))
+        (1,3)
+    """
     if doDimMatch(a, vector):
         returnList = [i for i in a]
         for i in range(len(a)):
@@ -83,10 +258,30 @@ def addVectorToPoint(a, vector):
         return tuple(i for i in returnList)
 
 #UNIT TESTED
-#input: a vector of any length besides 0
-#output: the corresponding unit vector of length 1
-#if a vector of 0 is put in, then 0,0 will be returned
 def unitVector(vector):
+    """
+    calculate the unit vector
+    
+    This function will take in any vector 
+    whose magnitude is not zero, and return the unit vector
+    in the form of a tuple. If the magnitude is 0, then a vector
+    of 0.0's is returned
+    
+    :param vector: a list or tuple representing the vector
+        you want to find the unit vector of
+
+    :type vector: list or tuple of numbers
+    
+    :returns: unit vector of vector
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (0, 1)
+        >>> b = (1, 2)
+        >>> print(addVectorToPoint(a,b))
+        (1,3)
+    """
     mag = magnitude(vector)
     returnList = []
     if mag == 0.0:
@@ -98,13 +293,34 @@ def unitVector(vector):
     return tuple(i for i in returnList)
 
 #UNIT TESTED with 2 examples
-#input: 3 points, a, b, c. A
-    #A is the point that you're ball is heading towards. It is the ball coord + ball Velocity
-    #B is the angle vertex, which are the coordinates of the ball
-    #C is the coordinates of the player, who's perpendicular position you're trying to find
-#output: if you draw a line from b to a, then what is the perpendicular 
-#    distance from c to that vector? that is what is returned
 def getPerpDist(a, b, c):
+    """
+    find perpendicular distance from ball's projected path, to player c
+    
+    A is the point that you're ball is heading towards. It is the ball coord + ball Velocity
+    B is the angle vertex, which are the coordinates of the ball
+    C is the coordinates of the player, who's perpendicular position you're trying to find
+    
+    :param a: a list or tuple representing point a, the point the ball is heading to
+    :param b: a list or tuple representing point b, the ball's current location
+    :param c: a list or tuple representing point c, the player's position, who you're trying to 
+        find the perpendiclar distance for. 
+        
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    :type c: list or tuple of numbers
+    
+    :returns: perpendicular distance form c to 
+    :rtype: number
+    
+    :Example:
+
+        >>> a = (2,3)
+        >>> b = (0,0)
+        >>> c = (1,-5)
+        >>> print(getPerpDist(a, b, c))
+        3.6055512754639892931192212674705
+    """
     #the hypotenuse is from B, the vertex, to the point you're trying to find the perpendicular distance to, C. 
     hypotenuse = getDist(b, c) 
     # the hypotenuse times the sin(theta), where theta is the angle formed by ABC, will give you perpendicular distance
@@ -118,8 +334,34 @@ def getPerpDist(a, b, c):
 #output: if you draw a line from b to a, then what is the perpendicular vector from c to intersection point?
 #    that vector is what this function returns. 
 def getNormalVector(a,b,c):
-    #ball travels from B to A
-    #player is at point C
+    """
+    find the vector representing the shortest path that player 
+    at coordinate c takes to intercept ball
+    
+    A is the point that you're ball is heading towards. It is the ball coord + ball Velocity
+    B is the angle vertex, which are the coordinates of the ball
+    C is the coordinates of the player, who's perpendicular position you're trying to find
+    
+    :param a: a list or tuple representing point a, the point the ball is heading to
+    :param b: a list or tuple representing point b, the ball's current location
+    :param c: a list or tuple representing point c, the player's position, who you're trying to 
+        find the perpendiclar distance for. 
+        
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    :type c: list or tuple of numbers
+    
+    :returns: vector from player at postition c to interception point
+    :rtype: tuple of numbers
+    
+    :Example:
+
+        >>> a = (2,3)
+        >>> b = (0,0)
+        >>> c = (1,-5)
+        >>> print(getNormalVector(a, b, c))
+        (-3, 2)
+    """
     cutoffDist = getPerpDist(a,b,c)
     tempVector = unitVector(getVector(b,a))
     normalVectors = []
@@ -138,6 +380,33 @@ def getNormalVector(a,b,c):
 #input: any vector or position
 #output: the noisy version of that vector or position, as sampled from a gaussian normal distribution
 def getNoisyVals(vector, sigma):
+    """
+    add some noise to an input vector and return in
+    
+    This function will take in any vector, and then add 
+    some noise to it based on the sigma value. This function
+    iterates over each dimension of the vector, and creates a 
+    gaussian distribution centered at the value for that dimension.
+    sigma is the variance. a random value from that gaussian distribution
+    is selected and returned. 
+    
+    
+    :param vector: a list or tuple representing the vector
+        you want to find the unit vector of
+    :param sigma: the amount of noise you want to add
+
+    :type vector: list or tuple of numbers
+    :type sigma: a number
+    
+    :returns: a noisy version of the input vector
+    :rtype: tuple of numbers
+    
+    :Example:
+
+        >>> a = (1, 1)
+        >>> print(getNoisyVas(a, 0.1))
+        (.994919387410,1.0089091387401)
+    """
     returnList = []
     for i in range(len(vector)):
         returnList.append(random.gauss(vector[i], sigma))
@@ -147,11 +416,59 @@ def getNoisyVals(vector, sigma):
 #input: 2 positions a and b
 #output: the midpoint between those 2 points
 def getMidPoint(a,b):
+    """
+    gets the midpoint between a and b
+    
+    This function will take in 2 coordinates, a and b, and
+    it will then calculate and return the midpoint. 
+    
+    
+    :param a: a list or tuple representing one of the two
+        coordinates you're trying to find the midpoint of
+    :param b: a list or tuple representing one of the two
+        coordinates you're trying to find the midpoint of
+
+    :type a: list or tuple of numbers
+    :type b: list or tuple of numbers
+    
+    :returns: the midpoint of a and b
+    :rtype: tuple of numbers
+    
+    :Example:
+
+        >>> a = (1, 1)
+        >>> b = (2, 2)
+        >>> print(getMidPoint(a, b))
+        (1.5, 1.5)
+    """
     return ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
 
 #input: a scalar value and a vector.
 #output: scaled vector. Useful for movement functions in keepaway.py
 def scalarMultiply(scalar, vector):
+    """
+    multiply some vector by a scalar value and return it
+    
+    This function will take in any vector, and then multiply
+    it by the scalar value. It will then return the value
+    
+    
+    :param vector: a list or tuple representing the vector
+        you want to multiply by a scalar
+    :param scalar: the number you want to multiply the vector by
+
+    :type vector: list or tuple of numbers
+    :type scalar: a number
+    
+    :returns: the multiplied vector
+    :rtype: tuple of numbers
+    
+    :Example:
+
+        >>> a = (17, 18)
+        >>> print(scalarMultiply(a, 2))
+        (34, 36)
+    """
     returnList = []
     for i in range(len(vector)):
         returnList.append(vector[i] * scalar)
@@ -244,6 +561,6 @@ class testingCode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print  'Unit Testing' 
+    print('Unit Testing') 
     unittest.main()
     
