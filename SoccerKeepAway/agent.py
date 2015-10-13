@@ -335,15 +335,7 @@ class agent():
         :returns: a list of 2 unit vectors, each one representing the 2 directions that
             the ball can be kicked to achieve the desired angle.
             
-        :rtype: list of tuples
-        
-        :Example:
-    
-            >>> a = (1, 0)
-            >>> b = (0, 0)
-            >>> c = (1, 1)
-            >>> print(posSinTheta(a,b,c))
-            0.70710678118654752440084436210485
+        :rtype: list of tuples, each tuple being a tuple of floats.
         """
         discriminantIsZero = False
         terminalPosCosZero = kUtil.addVectorToPoint(self.noisyBallPos, vector) 
