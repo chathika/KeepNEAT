@@ -91,7 +91,8 @@ class agent():
     #agent will need this reference in order to set the ball's velocity if the agent ever gains posession
     def receiveBallReference(self, inputBall):
         """
-        This function gives the agent a reference to the field ball. 
+        This function gives the agent a reference to the field ball. Only
+        the keepaway.py module should be using this function.
         
         :param inputBall: this is the ball that the agent is getting a
             reference to. This function should only be called from the
@@ -110,6 +111,7 @@ class agent():
         This function gives the agent a reference to the simulators array
         of keepers and takers. The index that is being input is value from
         0 to 2, and indicates how relatively close the agent is to the ball.
+        Only the keepaway.py module should be calling this function.
         
         :param keeperArray: This is the array of keepers from the simulator
         :param takerArray: This is the array of takers from the simulator
@@ -132,7 +134,8 @@ class agent():
     def receiveSimpleStateVariables(self, noisyVariables):
         """
         The simulator will call this function in order to give the agent class
-        a noisy version of the simple state variables
+        a noisy version of the simple state variables.
+        Only the keepaway.py module should be calling this function.
         
         :param noisyVariables: This is the array containing the noisy version
             of the simple state variables. 
@@ -152,7 +155,8 @@ class agent():
         the keeper, indicating which keeper is in the best position to acquire the 
         ball. The point_to_run_to is the point that this keeper must run to in order
         to acquire the ball. More details about how the receieve decision is calculated
-        can be found in the calcReceive module. 
+        can be found in the calcReceive module.
+        Only the keepaway.py module should be calling this function. 
         
         :param rDecision: a tuple containing the index of the keeper that's in the 
             best position to intercept the ball, and the coordinate that the keeper
@@ -174,6 +178,7 @@ class agent():
         of the calculates that take place at the agent level. The simulator 
         calculates things with the true positions, and the true positions are kept
         private from the agent classes. 
+        Only the keepaway.py module should be calling this function.
         
         :param noisyPosition: This is a coordinate with a noisy reading of the
             agent's current position.
@@ -230,11 +235,12 @@ class agent():
                
     
     #just hold your ground and return        
-    def holdBall(self):
+    def _holdBall(self):
         """
         If a keeper currently has the ball, then it has the option to hold the ball,
         or pass it. Call this function to hold the ball. Holding the ball means the
-        agent holding the ball cannot move.
+        agent holding the ball cannot move. Only the subclasses of agent should be
+        using this function.
         
         :returns: no return
         """
@@ -244,13 +250,14 @@ class agent():
     
             
     #only keeper 0 will have this option available
-    def passBall(self, integerK):
+    def _passBall(self, integerK):
         """
         If a keeper currently has the ball, then it has the option to hold the ball,
         or pass it. Call this function to pass the ball. integerK represents the 
         keeper that the ball holder is passing to. integerK = 1 means pass to the 
         keeper that is closest to the ball besides the ball holder. integerK = 2
-        means pass to the 2nd closest, and so on.
+        means pass to the 2nd closest, and so on. Only subclasses of agent should
+        be calling this function.
         
         :param integerK: this represents the 
             keeper that the ball holder is passing to. integerK = 1 means pass to the 
@@ -503,7 +510,7 @@ class agent():
             self.__getOpen() #get open with respect to this
             
     #THIS FUNCTION IS MEANT TO BE OVER RIDDEN BY EXTENION OF AGENT        
-    def decisionFunction(self):
+    def _decisionFunction(self):
         """
         This function is meant to be over ridden by children class that are
         inheriting this method. This method is responsible for intelligence 
@@ -524,6 +531,8 @@ class agent():
                 self.__goToBall()
             else:
                 #you're the farther taker, so go and block pass to the closer keeper
+                """
+                #this is the code where the 2nd taker is stupid. 
                 keeperActual = sorted(self.keeperArray)
                 cos2 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
                 cos3 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
@@ -532,6 +541,19 @@ class agent():
                     self.__blockPass(1)
                 else:
                     self.__blockPass(2)
+                """
+                #this is the code where the 2nd keeper is smarter and acts as if he understands positioning better
+                                #this is the code where the 2nd taker is stupid. 
+                keeperActual = sorted(self.keeperArray)
+                cos2 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
+                cos3 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
+                if cos2 > cos3:
+                    #if cos2 is bigger, then the taker going for the ball is also kinda blocking a pass to keeper 1. At least
+                    #he's doing a better job blocking K1 than K2, so go block K2
+                    self.__blockPass(2)
+                else:
+                    #otherwise, go block K1
+                    self.__blockPass(1)
 
         else:
             #the agent is a keeper
@@ -539,7 +561,7 @@ class agent():
                 #deterministic stuff happens here
                 self.receive()
             else:
-                self.decisionFunction()
+                self._decisionFunction()
         
     #this function is for saving the training data
     #if you have multiple agents, make the inputAgent string

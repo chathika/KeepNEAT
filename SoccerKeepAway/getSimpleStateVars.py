@@ -53,20 +53,23 @@ def getStateVarsKeepers(keepers,takers,center):
     keeperActual = sorted(keepers)
     takerActual = sorted(takers)
     
+    #state variables 0 - 2
     for i in range(len(keeperActual)):
         returnList.append(__distCenter(keeperActual[i], center))
-        
+    
+    #state variables 3 - 4
     for i in range(len(takerActual)):
         returnList.append(__distCenter(takerActual[i], center))
     
-    
+    #state variables 5 - 6
     for i in range(1,len(keeperActual)):
         returnList.append(__distAgent(keeperActual[0], keeperActual[i]))
     
+    #state variables 7 - 8
     for i in range(len(takerActual)):
         returnList.append(__distAgent(keeperActual[0], takerActual[i]))
     
-    
+    #state variables 9 - 12
     returnList.append(min(__distAgent(keeperActual[1], takerActual[0]),__distAgent(keeperActual[1], takerActual[1])))
     returnList.append(min(__distAgent(keeperActual[2], takerActual[0]),__distAgent(keeperActual[2], takerActual[1])))
     returnList.append(max(__getCosAngle(keeperActual[1], keeperActual[0], takerActual[0]),__getCosAngle(keeperActual[1], keeperActual[0], takerActual[1])))

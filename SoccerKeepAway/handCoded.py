@@ -17,7 +17,7 @@ class handCoded(agent.agent):
         agent.agent.__init__(self, worldRef, simIndex, noisyPos, sigma, agentType, noisyBallPos, maxPlayerSpeed, maxBallSpeed, posession)
 
     
-    def decisionFunction(self):
+    def _decisionFunction(self):
         """
         This is a hand coded policy for deciding on holding the ball, or which team 
         member to pass to. The logic of this decision function is based very heavily 
@@ -36,22 +36,17 @@ class handCoded(agent.agent):
         c3 = 77 #c3 is the number of pixels you assume are in 5 meteres
         #state variable 7 is distance in pixels from K1 to T1
         if self.stateVariables[7] > c1:
-            self.holdBall()
+            self._holdBall()
         else:
             passMax = float("-Inf")
             passMaxArg = None
             for i in range(1,3):
                 var = (c2 * arccos(self.stateVariables[10+i])) + (self.stateVariables[8+i] / c3)
-                print("deubugging variables")
-                print("var:", var)
-                print("state variable at index", (10 + i), ":" , self.stateVariables[10+i])
-                print("state variable at index", (8 + i), ":" ,  self.stateVariables[8+i])
-                print("arcos of state variable at index", (10 + i), ":" ,  arccos(self.stateVariables[10+i]))
                         
                 if var > passMax:
                     passMax = var
                     passMaxArg = i
-            self.passBall(passMaxArg)
+            self._passBall(passMaxArg)
         
 
                         

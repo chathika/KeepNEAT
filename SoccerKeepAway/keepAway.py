@@ -704,10 +704,38 @@ class keepAway():
         #send the state variables to each keeper and taker
         for i in range(len(self.keeperArray)):
             noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
+            self.__boundSimpleVars(noisyCurrVars)
             self.keeperArray[i].receiveSimpleStateVariables(noisyCurrVars)
         for i in range(len(self.takerArray)):
             noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
+            self.__boundSimpleVars(noisyCurrVars)
             self.takerArray[i].receiveSimpleStateVariables(noisyCurrVars)
+    
+    def __boundSimpleVars(self, noisySimpleStateVars):
+        """
+        For the sake of simulating sensor error, some noise is added to the state variables
+        that are calculated. However, the last 2 state variables are cosine values. Cosine values
+        are bounded [-1.0, 1.0], so this function was made to ensure that the last 2 state variables are 
+        bounded by [-1.0, 1.0] after noise is added to it. This is important because the arccos
+        of these 2 state variables is calculated sometimes, and if the value input into arccos
+        just so happens to be out of this range,the program will crash. 
+        
+        :param noisySimpleStateVars: The noisy version of the simple state variables. This should
+        be calculated in the sendSimpleStateVars function of keepaway.py. 
+        :type noisySimpleStateVars: tuple or list of floats
+        
+        :returns: the noisySimpleStateVars, but with the last 2 parameters bounded by [-1.0, 1.0]
+        :rtype: tuple or list of floats
+        """
+        varIndex11 = noisySimpleStateVars[11]
+        varIndex12 = noisySimpleStateVars[12]
+        while (varIndex11 > 1.0 or varIndex11 <  -1.0):
+            varIndex11 = kUtil.getNoisyVals(noisySimpleStateVars[11], self.agentSigmaError)
+        while (varIndex12 > 1.0 or varIndex12 <  -1.0):
+            varIndex12 = kUtil.getNoisyVals(noisySimpleStateVars[12], self.agentSigmaError)
+            
+        return noisySimpleStateVars[:10] + (varIndex11, varIndex12)
+
             
     def sendCalcReceiveDecision(self):
         """

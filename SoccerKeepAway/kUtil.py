@@ -407,10 +407,15 @@ def getNoisyVals(vector, sigma):
         >>> print(getNoisyVas(a, 0.1))
         (.994919387410,1.0089091387401)
     """
-    returnList = []
-    for i in range(len(vector)):
-        returnList.append(random.gauss(vector[i], sigma))
-    return tuple(i for i in returnList)
+    try: 
+        some_object_iterator = iter(vector)
+        returnList = []
+        for i in range(len(vector)):
+            returnList.append(random.gauss(vector[i], sigma))
+        return tuple(i for i in returnList)
+    except TypeError:
+        #this vector isn't iterable. It's probably just a single integer or float
+        return random.gauss(vector, sigma)
 
 #UNIT TESTED
 #input: 2 positions a and b
