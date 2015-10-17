@@ -472,11 +472,17 @@ class agent():
     
     def __blockPass(self, kIndex):
         """
-        This function is implemented by the taker who is farther from the ball. 
+        This function will take a keeper to block as a parameter. The keeper 
+        that this taker is trying to block should NOT have the ball. 
+        This function works by taking the position of the keeper with the ball, 
+        and the position of the keeper to block, and making the taker run to the 
+        midpoint of these 2 positions. In 3V2 keepaway, this function should be 
+        implemented by the taker farther from the ball. 
         
-        This function calculates the angles formed by itself, the ball, and each
-        keeper. It will then decide to block the keeper that has a bigger angle.
-        It blocks a keeper by running to the midpoint between that keeper and the ball
+        :param kIndex: the index of the keeper to take, sorted by distance. so kIndex = 1 means
+            the keeper who is closest to the ball besides the keeper who has the ball. 
+            kIndex = 2 means the 2nd closest keeper, and so on. 
+        :type kIndex: integer
         
         :returns: nothing
         """
@@ -522,7 +528,8 @@ class agent():
     def decisionFlowChart (self):
         """
         This function will control the movement of keepers and takers. It controls 
-        movement by calling on all the private movement functions that are  
+        movement by calling on all the private movement functions that are in defined
+        in this agent class
         """
         if (self.getAgentType() == "taker"):
             takerActual = sorted(self.takerArray)
@@ -569,7 +576,7 @@ class agent():
     #the name is the object name, such as "dict" or whatever
     def save_obj(self, obj, name, index , inputAgent):
         """
-        this function is for saving the training data.
+        this function is for saving the training data. 
         
         :param obj: the actual object that you're trying to save. It's usually
             a dict object that's being saved. 
@@ -675,7 +682,7 @@ class agent():
         this function is simply used to allow comparision between different agents, so
         that agents can be sorted. Agents are sorted based on which agent is closest to
         the ball. So now, the simulator can call sorted(agents), and an array of all the 
-        agents is returned such that the agents are sorted based on who is closest to the ball
+        agents is returned such that the agents are sorted based on who is closest to the ball.
         
         :returns: if self is closer to the ball than the other agent
         :rType: boolean
