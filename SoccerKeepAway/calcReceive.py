@@ -62,6 +62,7 @@ def calc_receive(worldRef, inputDirection = None):
             break
         
     #you're either calculating a hypothetical pass, or the actual pass
+    """
     if inputDirection == None:
         print("calc recieve for ball. ")
         if(worldRef.fieldBall.trueBallDirection == (0.0, 0.0)):
@@ -69,6 +70,10 @@ def calc_receive(worldRef, inputDirection = None):
         else:
             print("ball is moving") 
         inputDirection = worldRef.fieldBall.trueBallDirection
+    """
+    if inputDirection == None:
+        inputDirection = worldRef.fieldBall.trueBallDirection
+    
     
     if(inputDirection == (0.0, 0.0))== False:
         rDecision = __calc_receive_ball_moving(worldRef, inputDirection, posessingKeeperIndex)
@@ -201,7 +206,7 @@ def __calcOptimal(worldRef, agentList, i, intersect):
     """
     #if the intersect is in bounds, just go to it. no calculations needed
     if __isPointOutOfPlayRegion(worldRef, intersect, agentList, i) == False:
-        print("point in bounds, return intersect") 
+        #print("point in bounds, return intersect") 
         return intersect
         
     #V = vector from agent's perpendicular intercept to the ball

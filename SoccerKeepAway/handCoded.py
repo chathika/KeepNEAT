@@ -42,6 +42,12 @@ class handCoded(agent.agent):
             passMaxArg = None
             for i in range(1,3):
                 var = (c2 * arccos(self.stateVariables[10+i])) + (self.stateVariables[8+i] / c3)
+                """
+                print("var = ", var)
+                print("stateVariable[", 10 + i, "]=", self.stateVariables[10+i] )
+                print("arccos of stateVariable[", 10 + i, "]=", arccos(self.stateVariables[10+i]) )
+                print("stateVariable[", 8 + i, "]=", self.stateVariables[8+i] )
+                """
                         
                 if var > passMax:
                     passMax = var

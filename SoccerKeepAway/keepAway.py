@@ -1,7 +1,7 @@
 """
 This module contains keepAway, which is the simulator class. 
 """
-import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive
+import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView
 import pygame, sys, math
 
 class keepAway():
@@ -235,11 +235,12 @@ class keepAway():
     def __updateScore(self):
         """
         This function simply increments the keeper's score for each tick that the
-        keepers manage to prevent the takers from taking the ball.
+        keepers manage to hold the ball without a taker taking it.
         
         :returns: no return
         """
-        self.keeperScore += 1
+        if self.fieldBall.inPosession:
+            self.keeperScore += 1
         
     def debugPassVectors(self, startPoint, vectors):
         """
@@ -506,6 +507,11 @@ class keepAway():
         training mode. Training mode will be used by the intelligent agents such as
         SARSA, NEAT, hyperNEAT, etc.
         
+        All it does is reset the ball position, the agent positions, and also sets the
+        individual agents "inPosession", and "isKicking" flags to false, to indicate 
+        that there are no agents that have posession of the ball, nor are there
+        any agents kicking the ball. 
+        
         :returns: no return 
         """
         #reset the ball variables
@@ -690,7 +696,7 @@ class keepAway():
     """THIS CODE IS FOR PRE-CALCULATING RECEIVE(), STATE VARIABLES, AND SENDING THEM"""
     
     #send all the state variables to the keepers and takers
-    def sendSimpleStateVars(self):
+    def __sendSimpleStateVars(self):
         """
         This public function will send all keepers the simple state variables.
         This function should be called for intelligent agents such as NEAT, 
@@ -704,11 +710,11 @@ class keepAway():
         #send the state variables to each keeper and taker
         for i in range(len(self.keeperArray)):
             noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
-            self.__boundSimpleVars(noisyCurrVars)
+            noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
             self.keeperArray[i].receiveSimpleStateVariables(noisyCurrVars)
         for i in range(len(self.takerArray)):
             noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
-            self.__boundSimpleVars(noisyCurrVars)
+            noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
             self.takerArray[i].receiveSimpleStateVariables(noisyCurrVars)
     
     def __boundSimpleVars(self, noisySimpleStateVars):
@@ -721,10 +727,12 @@ class keepAway():
         just so happens to be out of this range,the program will crash. 
         
         :param noisySimpleStateVars: The noisy version of the simple state variables. This should
-        be calculated in the sendSimpleStateVars function of keepaway.py. 
+            be calculated in the sendSimpleStateVars function of keepaway.py. 
+        
         :type noisySimpleStateVars: tuple or list of floats
         
         :returns: the noisySimpleStateVars, but with the last 2 parameters bounded by [-1.0, 1.0]
+        
         :rtype: tuple or list of floats
         """
         varIndex11 = noisySimpleStateVars[11]
@@ -733,11 +741,18 @@ class keepAway():
             varIndex11 = kUtil.getNoisyVals(noisySimpleStateVars[11], self.agentSigmaError)
         while (varIndex12 > 1.0 or varIndex12 <  -1.0):
             varIndex12 = kUtil.getNoisyVals(noisySimpleStateVars[12], self.agentSigmaError)
-            
-        return noisySimpleStateVars[:10] + (varIndex11, varIndex12)
+        if varIndex11 > 1.0 or varIndex11 < -1.0 or varIndex12 > 1.0 or varIndex12 < -1.0:
+            print("Values still out of range: varIndex11 = ", varIndex11, ", varIndex12 = ", varIndex12)
+        return noisySimpleStateVars[:11] + (varIndex11, varIndex12)
+    
+    def __sendBirdsEyeView(self):
+        #get the state variables
+        currVars = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.display_height, self.__agent_block_size)
+        #send the state variables to each keeper and taker
+
 
             
-    def sendCalcReceiveDecision(self):
+    def __sendCalcReceiveDecision(self):
         """
         This public function will send all keepers the receive decision. For more information
         on what the receive decision is, refer to the documentation of the module "calcReceive"
@@ -745,8 +760,8 @@ class keepAway():
         :returns: no return
         """  
         rDecision = calcReceive.calc_receive(self)
-        print("rDecision decided upon:")
-        print(rDecision)
+        #print("rDecision decided upon:")
+        #print(rDecision)
         for i in range(len(self.keeperArray)):
             rNoisyDecision= (rDecision[0], kUtil.getNoisyVals(rDecision[1], self.agentSigmaError))
             self.keeperArray[i].receiveDecision(rNoisyDecision)
@@ -848,18 +863,24 @@ class keepAway():
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         gameExit = True
-                self.sendCalcReceiveDecision()
-                self.sendSimpleStateVars()
+                self.__sendCalcReceiveDecision()
+                self.__sendSimpleStateVars()
                 for keeper in self.keeperArray:
                     keeper.decisionFlowChart()
                 for taker in self.takerArray:
                     taker.decisionFlowChart()
-            elif(mode == "sarsa"):
+            elif(mode == "neat"):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         gameExit = True
-                self.sendCalcReceiveDecision()
-                self.sendSimpleStateVars()
+                self.__sendCalcReceiveDecision()
+                self.__sendSimpleStateVars()
+            elif(mode == "hyperneat"):
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        gameExit = True
+                self.__sendCalcReceiveDecision()
+                self.__sendBirdsEyeView()
 
             #this is common code that will occur regardless of what agent you picked
             #if (self.fieldBall.inPosession == False):
