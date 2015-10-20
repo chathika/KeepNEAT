@@ -1,8 +1,10 @@
 """
 This module contains keepAway, which is the simulator class. 
 """
-import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView
+import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView, NEAT, hyperNEAT
 import pygame, sys, math
+
+
 
 class keepAway():
     """
@@ -35,6 +37,13 @@ class keepAway():
         self.__predictedImage = pygame.image.load('images/x.png')
         self.__debugYellowDotImage = pygame.image.load('images/yellow_dot.png')
         self.__debugRedDotImage = pygame.image.load('images/red_dot.png')
+        self.__debugTakerPathTile = pygame.image.load('images/takerPathSquare.png')
+        self.__debugKeeperPathTile = pygame.image.load('images/keeperPathSquare.png')
+        self.__debugKeeperTile = pygame.image.load('images/keeperSquare.png')
+        self.__debugTakerTile = pygame.image.load('images/takerSquare.png')
+        self.__debugEmptyTile = pygame.image.load('images/emptySquare.png')
+        self.__debugTakerPathTileTwo = pygame.image.load('images/takerPathSquare2.png')
+        self.__debugKeeperPathTileTwo = pygame.image.load('images/keeperPathSquare2.png')
         #block sizes are used for collision detection
         #only 1 size per element because all blocks are squares. block size = side length
         self.__agent_block_size = 23
@@ -46,10 +55,10 @@ class keepAway():
         
         #dimensions of the game are the same as the soccer field image
         self.__display_width = 550
-        self.display_height = 357
-        self.__field_center = (self.__display_width / 2 , self.display_height / 2)
+        self.__display_height = 357
+        self.__field_center = (self.__display_width / 2 , self.__display_height / 2)
         #gameDisplay is a pygame.surface object. it's your screen
-        self.gameDisplay = pygame.display.set_mode((self.__display_width,self.display_height))
+        self.gameDisplay = pygame.display.set_mode((self.__display_width,self.__display_height))
         self.test_fps = 60
         self.train_fps = 10000
         self.clock = pygame.time.Clock()
@@ -66,15 +75,15 @@ class keepAway():
         self.keeperTruePosArray = []
         self.keeperTruePosArray.append((12.5, 12.5))
         self.keeperTruePosArray.append((25,  self.__display_width - 37.5))
-        self.keeperTruePosArray.append((self.display_height - 37.5,  self.__display_width - 37.5))
+        self.keeperTruePosArray.append((self.__display_height - 37.5,  self.__display_width - 37.5))
         self.keeperArray.append(agent.agent(self, 0, kUtil.getNoisyVals( self.keeperTruePosArray[0], self.agentSigmaError), self.agentSigmaError, types[0], kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.agentSigmaError), self.maxPlayerSpeed, self.maxBallSpeed))
         self.keeperArray.append(agent.agent(self, 1, kUtil.getNoisyVals( self.keeperTruePosArray[1], self.agentSigmaError), self.agentSigmaError, types[0], kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.agentSigmaError), self.maxPlayerSpeed, self.maxBallSpeed))
         self.keeperArray.append(agent.agent(self, 2, kUtil.getNoisyVals( self.keeperTruePosArray[2], self.agentSigmaError), self.agentSigmaError, types[0], kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.agentSigmaError), self.maxPlayerSpeed, self.maxBallSpeed))
         
         self.takerArray = []
         self.takerTruePosArray = []
-        self.takerTruePosArray.append((self.display_height - 25,  25))
-        self.takerTruePosArray.append((self.display_height - 37.5,  50))
+        self.takerTruePosArray.append((self.__display_height - 25,  25))
+        self.takerTruePosArray.append((self.__display_height - 37.5,  50))
         self.takerArray.append(agent.agent(self, 0, self.takerTruePosArray[0], self.agentSigmaError, types[1], kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.agentSigmaError), self.maxPlayerSpeed, self.maxBallSpeed))
         self.takerArray.append(agent.agent(self, 1, self.takerTruePosArray[1], self.agentSigmaError, types[1], kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.agentSigmaError), self.maxPlayerSpeed, self.maxBallSpeed))
         
@@ -118,7 +127,7 @@ class keepAway():
         :returns: no return
         """
         textSurface,textRect = self.__text_objects(msg,color, size)
-        textRect.center = (self.__display_width/2), (self.display_height/2) + y_displace
+        textRect.center = (self.__display_width/2), (self.__display_height/2) + y_displace
         self.gameDisplay.blit(textSurface, textRect)
         
     def __text_objects(self, text,color, size):
@@ -211,16 +220,20 @@ class keepAway():
             self.clock.tick(10)
             
     
-    def __drawWorld (self):
+    def __drawWorld (self, grid = None):
         """
         This function will go and update the screen to display the next frame of 
         animation. This function should be called only after all the movement
         of agents and the ball has been calculated. 
         
         :returns: no return
-        """
+        """                    
         #note: for blit function, give it column, row instead of row, column
         self.gameDisplay.blit(self.__worldImage, (0,0))
+        
+        if (grid != None):
+            self.__drawBirdsEyeView(grid)
+        
         for i in range(len(self.keeperArray)):
             self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
         for i in range(len(self.takerArray)):
@@ -231,6 +244,24 @@ class keepAway():
         if (self.keeperArray[0].onReceiveDecision != None):
             self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
 
+    def __drawBirdsEyeView(self, grid):
+        for i in range(len(grid)):
+            for j in range(len(grid[i])):
+                if grid[i][j] == 0.0:
+                    self.gameDisplay.blit(self.__debugEmptyTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+                if grid[i][j] == -1.0:
+                    self.gameDisplay.blit(self.__debugTakerTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+                if grid[i][j] == 1.0:
+                    self.gameDisplay.blit(self.__debugKeeperTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+                if grid[i][j] == 0.3:
+                    self.gameDisplay.blit(self.__debugKeeperPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+                if grid[i][j] == -0.3:
+                    self.gameDisplay.blit(self.__debugTakerPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+                if grid[i][j] == -0.6:
+                    self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+                if grid[i][j] == 0.6:
+                    self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+                    
     
     def __updateScore(self):
         """
@@ -487,7 +518,7 @@ class keepAway():
         colPixel2 = colPixel1 + self.__agent_block_size 
         
         #check to see if you go outside the boundaries of the game    
-        if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.display_height or colPixel2 > self.__display_width :
+        if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.__display_height or colPixel2 > self.__display_width :
             #print "upper left coordinates: ", (rowPixel1, colPixel1) 
             return False
         #if you're not outside boundaries, then it's a totally legal direction. It just might not be optimal
@@ -515,7 +546,7 @@ class keepAway():
         :returns: no return 
         """
         #reset the ball variables
-        row = random.randint(0, int(self.display_height/2))
+        row = random.randint(0, int(self.__display_height/2))
         col = random.randint(int(self.__display_width/4), int (self.__display_width/4 * 3))
         self.fieldBall.updateCoordinate((row,col))
         self.fieldBall.update((0.0,0.0))
@@ -526,9 +557,9 @@ class keepAway():
         #now reset the agent positions:
         self.keeperTruePosArray[0] = (12.5, 12.5)
         self.keeperTruePosArray[1] = (25,  self.__display_width - 37.5)
-        self.keeperTruePosArray[2] = (self.display_height - 37.5,  self.__display_width - 37.5)
-        self.takerTruePosArray[0] = (self.display_height - 25,  25)
-        self.takerTruePosArray[1] = (self.display_height - 37.5,  50)
+        self.keeperTruePosArray[2] = (self.__display_height - 37.5,  self.__display_width - 37.5)
+        self.takerTruePosArray[0] = (self.__display_height - 25,  25)
+        self.takerTruePosArray[1] = (self.__display_height - 37.5,  50)
         
         for i in range(len(self.keeperArray)):
             self.keeperArray[i].updateAgentPosition(kUtil.getNoisyVals(self.keeperTruePosArray[i], self.agentSigmaError)) 
@@ -565,7 +596,7 @@ class keepAway():
         colPixel2 = colPixel1 + self.ball_block_size    
         
         #check to see if you go outside the boundaries of the game    
-        if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.display_height - 1 or colPixel2 > self.__display_width - 1:  
+        if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.__display_height - 1 or colPixel2 > self.__display_width - 1:  
             return True
         #If you made it here, then that means the game is still going
         return False
@@ -747,8 +778,10 @@ class keepAway():
     
     def __sendBirdsEyeView(self):
         #get the state variables
-        currVars = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.display_height, self.__agent_block_size)
-        #send the state variables to each keeper and taker
+        grid = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+        #send the state variables to each keeper
+        for i in range(len(self.keeperArray)):
+            self.keeperArray[i].receiveBirdsEyeView(grid)
 
 
             
@@ -788,12 +821,13 @@ class keepAway():
             self.__message_to_screen("Welcome to Keep Away",
                               self.__green,
                               -100,
-                              "medium")
-            """      
-            self.__message_to_screen("S for SARSA, ",
+                              "medium")      
+            self.__message_to_screen("N for NEAT, ",
                               self.__black,
-                              80)    
-            """        
+                              40)   
+            self.__message_to_screen("S for HyperNEAT, ",
+                              self.__black,
+                              80)           
             self.__message_to_screen("H for hand coded agent, or E to exit.",
                               self.__black,
                               120) 
@@ -806,7 +840,14 @@ class keepAway():
                     self.__exitSim()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
-                        mode = "sarsa"
+                        mode = "hyperNEAT"
+                        self.__replaceAgents(hyperNEAT.hyperNEAT)
+                        intro = False
+                        return mode
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_n:
+                        mode = "NEAT"
+                        self.__replaceAgents(NEAT.NEAT)
                         intro = False
                         return mode
                     if event.key == pygame.K_h:
@@ -823,7 +864,7 @@ class keepAway():
                         
             self.clock.tick(5)
     
-    def gameLoop(self, mode):
+    def gameLoop(self, mode, turnOnGrid = False):
         """
         This is the main game loop. Each iteration of this counts as a tick. 
         With each tick, an agent can move keepAway.maxPlayerSpeed units, and the
@@ -838,6 +879,12 @@ class keepAway():
         experimentAgent = self.keeperArray[0]
         #each occurance of this loop is treated as one simulation cycle
         while not gameExit:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    gameExit = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.pause("PAUSED. Press Space to continue")
             if(mode == "manual"):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -860,9 +907,6 @@ class keepAway():
                         elif event.key == pygame.K_4:
                             self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
             elif (mode == "hand_coded"):
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        gameExit = True
                 self.__sendCalcReceiveDecision()
                 self.__sendSimpleStateVars()
                 for keeper in self.keeperArray:
@@ -870,15 +914,9 @@ class keepAway():
                 for taker in self.takerArray:
                     taker.decisionFlowChart()
             elif(mode == "neat"):
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        gameExit = True
                 self.__sendCalcReceiveDecision()
                 self.__sendSimpleStateVars()
             elif(mode == "hyperneat"):
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        gameExit = True
                 self.__sendCalcReceiveDecision()
                 self.__sendBirdsEyeView()
 
@@ -892,7 +930,12 @@ class keepAway():
                 self.keeperArray[i].noisyBallPos = kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.keeperArray[i].getSigma())                
             self.__updateBallPosession()
             self.__updateScore()
-            self.__drawWorld ()
+            #remove this line if you don't want the grid to be drawn
+            if (turnOnGrid):
+                grid = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+                self.__drawWorld (grid)
+            else:
+                self.__drawWorld()
             self.__displayScore()
             pygame.display.update()
             

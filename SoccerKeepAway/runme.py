@@ -25,12 +25,11 @@ class runme():
             #sarsa mode
             print("execute sarsa")
         elif (mode == "hand_coded"):
-            #sarsa mode
-            #print("execute hand coded")
+            #hand coded mode
             print("execute hand coded")
         elif (mode == "manual"):
             print("execute manual debugging mode")
-        world.gameLoop(mode)
+        world.gameLoop(mode, turnOnGrid = True)
         world.pause("game over. Final Score: ", world.keeperScore)
         
         

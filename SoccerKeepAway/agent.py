@@ -57,6 +57,7 @@ class agent():
         self.agentListIndex = None
         self.stateVariables = None
         self.onReceiveDecision = None #receive variables
+        self.birdsEyeView = None #the birds eye view for the hyperNEAT agent
         self.worldRef = worldRef
         
         #BALL VARIABLES
@@ -73,9 +74,9 @@ class agent():
         #    these coordinates define a rectangle that the agents will try to stay in:
         #    when an agent passes the ball, it makes sure it's team mate can get the ball
         #    at the edge of the boundary
-        self.playableRegionTopLeft = (self.worldRef.display_height * portionOfBorderToStayAwayFrom/2, 
+        self.playableRegionTopLeft = (self.worldRef.get_display_height() * portionOfBorderToStayAwayFrom/2, 
                                     self.worldRef.get_display_width() * portionOfBorderToStayAwayFrom/2)
-        self.playableRegionBottomRight = (self.worldRef.display_height - self.playableRegionTopLeft[0],
+        self.playableRegionBottomRight = (self.worldRef.get_display_height() - self.playableRegionTopLeft[0],
                                           self.worldRef.get_display_width() - self.playableRegionTopLeft[1])
         
         #initialize the cosines of interest for getting rotated vectors
@@ -146,6 +147,22 @@ class agent():
         """
         self.stateVariables = noisyVariables
         
+    def receiveBirdsEyeView(self, grid):
+        """
+        The simulator will call this function in order to give the agent class
+        a the birds eye view of the field
+        
+        :param grid: a 2D grid of floats where each float represents a tile. Each tile will have a slightly
+            negative value for tiles that are in the path between Keeper 0 and a taker, and slightly positive
+            for tiles that are in the path from keeper 0 to the other keepers. Tiles that have a keeper on 
+            it have a value of 1, and tiles that have a taker on it have a value of -1.
+        
+        :type grid: 2D arra of floats
+        
+        :returns: no return
+        """
+        self.birdsEyeView = grid
+    
     #used only in keepaway.py   
     def receiveDecision(self, rDecision):
         """
@@ -408,9 +425,9 @@ class agent():
         #to ignore. So it you migth end up ignoring 15% of the border
         #The rest of the area, split it into 25 points, going 5x5
         cutoffWidth = self.worldRef.get_display_width() * portionOfBorderToStayAwayFrom
-        cutoffHeight = self.worldRef.display_height * portionOfBorderToStayAwayFrom
+        cutoffHeight = self.worldRef.get_display_height() * portionOfBorderToStayAwayFrom
         widthIncrement = (self.worldRef.get_display_width() - (2 * cutoffWidth)) / 5.0
-        heightIncrement = (self.worldRef.display_height - (2*cutoffHeight)) / 5.0
+        heightIncrement = (self.worldRef.get_display_height() - (2*cutoffHeight)) / 5.0
         returnList = []
         for i in range(5):
             #i will be the row index iterator
@@ -636,7 +653,7 @@ class agent():
         :returns: noisy mid point
         :rType: tuple of integers
         """
-        return( (self.__noisy_pos[0] + self.worldRef.get_agent_block_size()) / 2.0 , (self.__noisy_pos[1] + self.worldRef.get_agent_block_size()) / 2.0 )
+        return( self.__noisy_pos[0] + (self.worldRef.get_agent_block_size() / 2.0 )  , self.__noisy_pos[1] + (self.worldRef.get_agent_block_size() / 2.0 ) )
     
     def getSigma(self):
         """
@@ -756,7 +773,7 @@ class testingCode(unittest.TestCase):
         #intialize agent to position 25,25 with no noise/error, as a keeper, with (357/2, 550/2) as center of field,
         #and 2 as agent speed, and 3 as ball speed
         testAgent = agent(keepAwayWorld,(25, 25), 0.0, "keeper", (357/2, 550/2), 2, 3)
-        #print "display height: ", testAgent.worldRef.display_height
+        #print "display height: ", testAgent.worldRef.get_get_display_height()()
         rows = [53.55, 103.53, 153.51, 203.49, 253.47]
         cols = [82.5, 159.5, 236.5,  313.5, 390.5]
         testPoints = testAgent.getOpenPoints
