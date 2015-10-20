@@ -18,12 +18,12 @@ class runme():
         world = keepAway.keepAway()
         mode =world.game_intro()
         
-        if (mode == "q_learning"):
-            #q learning mode
-            print("execute q learning") 
-        elif (mode == "sarsa"):
-            #sarsa mode
-            print("execute sarsa")
+        if (mode == "hyperNEAT"):
+            #hyperNEAT mode
+            print("execute hyperNEAT") 
+        elif (mode == "NEAT"):
+            #NEAT mode
+            print("execute NEAT")
         elif (mode == "hand_coded"):
             #hand coded mode
             print("execute hand coded")
