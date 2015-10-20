@@ -67,6 +67,9 @@ class keepAway():
         #start the ball kinda close to the keeper in the upper left corner
         self.fieldBall = ball.ball( (self.__field_center[0]/4, self.__field_center[1]/4), self.maxBallSpeed)
         
+        #birdsEyeView generator for agents like hyperNEAT:
+        self.bev = birdsEyeView.birdsEyeView()
+        
         #setup all the initial keepers and takers. They are all starting at different field positions, which is why
         #you can't have a for loop just iterate and declare all of them
         types = ["keeper", "taker"]
@@ -778,7 +781,7 @@ class keepAway():
     
     def __sendBirdsEyeView(self):
         #get the state variables
-        grid = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+        grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
         #send the state variables to each keeper
         for i in range(len(self.keeperArray)):
             self.keeperArray[i].receiveBirdsEyeView(grid)
@@ -932,7 +935,7 @@ class keepAway():
             self.__updateScore()
             #remove this line if you don't want the grid to be drawn
             if (turnOnGrid):
-                grid = birdsEyeView.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+                grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
                 self.__drawWorld (grid)
             else:
                 self.__drawWorld()
