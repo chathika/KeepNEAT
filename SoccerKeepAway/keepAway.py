@@ -33,6 +33,7 @@ class keepAway():
         self.__worldImage = pygame.image.load('images/soccer_field.png')
         self.__ballImage = pygame.image.load('images/ball.png')
         self.__keeperImage = pygame.image.load('images/keeper.png')
+        self.__keeperGoldImage = pygame.image.load('images/keeperGold.png')
         self.__takerImage = pygame.image.load('images/taker.png')
         self.__predictedImage = pygame.image.load('images/x.png')
         self.__debugYellowDotImage = pygame.image.load('images/yellow_dot.png')
@@ -51,6 +52,7 @@ class keepAway():
 
         self.maxBallSpeed= 4
         self.maxPlayerSpeed = 2
+        #self.rDecision = None
 
         
         #dimensions of the game are the same as the soccer field image
@@ -239,6 +241,12 @@ class keepAway():
         
         for i in range(len(self.keeperArray)):
             self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
+            """
+            #this is for debugging. comment this out later
+            if (self.rDecision != None):
+                if (i == self.rDecision[0]):
+                    self.gameDisplay.blit(self.__keeperGoldImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
+            """
         for i in range(len(self.takerArray)):
             self.gameDisplay.blit(self.__takerImage, (self.takerTruePosArray[i][1], self.takerTruePosArray[i][0]))
         self.gameDisplay.blit(self.__ballImage, (self.fieldBall.trueBallPos[1], self.fieldBall.trueBallPos[0]))
@@ -795,6 +803,7 @@ class keepAway():
 
         :returns: no return
         """  
+        #note: rDecision is only global so that it can be debugged. Once debugging is done, make it local again
         rDecision = calcReceive.calc_receive(self)
         #print("rDecision decided upon:")
         #print(rDecision)

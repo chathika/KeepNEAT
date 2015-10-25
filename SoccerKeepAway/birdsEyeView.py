@@ -146,9 +146,9 @@ class birdsEyeView():
                          self.__convertToTile( takerArray[i].getNoisyMidPoint(), block_size) ) ) )
             takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint(), block_size))
         returnGrid = [] #access values as row, col
-        for i in range(int(math.ceil(display_height/block_size))):
+        for i in range((display_height/block_size) + 1):
             returnGrid.append([]) 
-            for j in range(int(math.ceil(display_width/block_size))):
+            for j in range((display_width/block_size) + 1):
                 returnGrid[i].append(0.0) 
                 
         for path in takerPaths:

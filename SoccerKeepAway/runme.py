@@ -29,7 +29,7 @@ class runme():
             print("execute hand coded")
         elif (mode == "manual"):
             print("execute manual debugging mode")
-        world.gameLoop(mode, turnOnGrid = True)
+        world.gameLoop(mode, turnOnGrid = False)
         world.pause("game over. Final Score: ", world.keeperScore)
         
         

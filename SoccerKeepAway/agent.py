@@ -285,7 +285,7 @@ class agent():
         
         :returns: no return 
         """
-        print("passing to team mate ", integerK +1)
+        print("passing to keeper " +  str(integerK) + ", indexed by distance. ")
         #if you're passing to integerK = 1, then that means pass to the keeper that's closer to you
         #if you're passing ot integerK = 2, then that means pass to the keeper that's farther to you
         #0 is an invalid input
@@ -463,7 +463,7 @@ class agent():
             safety = max(kUtil.cosTheta(point, predictedBallPos, self.takerArray[0].get_noisy_pos()),
                          kUtil.cosTheta(point, predictedBallPos, self.takerArray[1].get_noisy_pos()))
             if (safety > safetyConstant):
-                #angle is too narrow, a taker can easiy steal
+                #angle is too narrow, a taker can easily steal
                 continue
             
             #if you're at this point, then then point is a safe point to consider
@@ -513,7 +513,7 @@ class agent():
         minDist = min(self.maxPlayerSpeed, kUtil.getDist(self.__noisy_pos, midPoint))
         self.worldRef.moveAttempt(self, (vector, minDist))
         
-    def receive(self):
+    def __receive(self):
         """
         This function is implemented only by keepers. Each keeper will implement
         this in order to decide if it should run towards the ball, or if it 
@@ -583,7 +583,7 @@ class agent():
             #the agent is a keeper
             if(self.inPosession == False):
                 #deterministic stuff happens here
-                self.receive()
+                self.__receive()
             else:
                 self._decisionFunction()
         
