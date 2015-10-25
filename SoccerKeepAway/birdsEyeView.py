@@ -3,25 +3,29 @@ This module contains a static functions for determining the birds eye view state
 pseudocode from following website was used:
 https://en.wikipedia.org/w/index.php?title=Bresenham%27s_line_algorithm&gettingStartedReturn=true
 
-The only function that should be called from here by the simulator class is getBirdsEyeView
+The only function that should be called from here by the simulator class is "getBirdsEyeView()".
+No other functions are documented as they are simply private functions to help the main 
+function "getBirdsEyeView()"
 """
 import unittest
 import math
 class birdsEyeView():
     def __init__(self):
         self.lambdaDict = {}
-        self.lambdaDict[0] = (lambda (x,y): (x,y) , lambda (x,y): (x,y) )
-        self.lambdaDict[1] = (lambda (x,y): (y, x) , lambda (x,y): (y, x) )
-        self.lambdaDict[2] = ( lambda (x,y): (y, -x),  lambda (x,y): (-y, x) )
-        self.lambdaDict[3] = ( lambda (x,y): (-x, y),  lambda (x,y):(-x, y) )
-        self.lambdaDict[4] = ( lambda (x,y): (-x, -y) , lambda (x,y):(-x, -y) )
-        self.lambdaDict[5] = ( lambda (x,y): (-y, -x), lambda (x,y): (-y, -x) )
-        self.lambdaDict[6] = ( lambda (x,y): (-y, x) , lambda (x,y): (y, -x) )
-        self.lambdaDict[7] = ( lambda (x,y): (x, -y) , lambda(x,y): (x, -y) )
+        self.lambdaDict[0] = (lambda point: (point[0],point[1]) , lambda point: (point[0],point[1]) )
+        self.lambdaDict[1] = (lambda point: (point[1], point[0]) , lambda point: (point[1], point[0]) )
+        self.lambdaDict[2] = ( lambda point: (point[1], -point[0]),  lambda point: (-point[1], point[0]) )
+        self.lambdaDict[3] = ( lambda point: (-point[0], point[1]),  lambda point:(-point[0], point[1]) )
+        self.lambdaDict[4] = ( lambda point: (-point[0], -point[1]) , lambda point:(-point[0], -point[1]) )
+        self.lambdaDict[5] = ( lambda point: (-point[1], -point[0]), lambda point: (-point[1], -point[0]) )
+        self.lambdaDict[6] = ( lambda point: (-point[1], point[0]) , lambda point: (point[1], -point[0]) )
+        self.lambdaDict[7] = ( lambda point: (point[0], -point[1]) , lambda point: (point[0], -point[1]) )
 
 
 
-    def getOctant(self, (x0,y0), (x1, y1)):
+    def getOctant(self, pointOne, pointTwo):
+        (x0,y0) = pointOne
+        (x1, y1) = pointTwo
         # +x , +y, oct 0 or 1
         # -x , +y, oct 2 or 3
         # -x , -y, oct 4 or 5
@@ -71,10 +75,14 @@ class birdsEyeView():
                     #oct 5
                     return 5
     
-    def getLambdasas(self, (x0,y0), (x1, y1)):       
+    def getLambdasas(self, pointOne, pointTwo):
+        (x0,y0) = pointOne      
+        (x1, y1) = pointTwo 
         return self.lambdaDict[self.getOctant((x0, y0), (x1, y1))]         
     
-    def __getQuadOneTiles(self, (x0,y0), (x1, y1)):       
+    def __getQuadOneTiles(self, pointOne, pointTwo):       
+        (x0,y0) = pointOne
+        (x1, y1) = pointTwo
         dx = x1 - x0
         dy = y1 - y0
         
@@ -146,9 +154,9 @@ class birdsEyeView():
                          self.__convertToTile( takerArray[i].getNoisyMidPoint(), block_size) ) ) )
             takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint(), block_size))
         returnGrid = [] #access values as row, col
-        for i in range((display_height/block_size) + 1):
+        for i in range(int(math.ceil(display_height/block_size))):
             returnGrid.append([]) 
-            for j in range((display_width/block_size) + 1):
+            for j in range(int(math.ceil(display_width/block_size)) ):
                 returnGrid[i].append(0.0) 
                 
         for path in takerPaths:
