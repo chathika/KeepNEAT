@@ -1,5 +1,6 @@
 """
-This module contains a static functions for determining the birds eye view state variable
+This module contains a static functions for determining the birds eye view state variable.
+
 pseudocode from following website was used:
 https://en.wikipedia.org/w/index.php?title=Bresenham%27s_line_algorithm&gettingStartedReturn=true
 
@@ -10,6 +11,11 @@ function "getBirdsEyeView()"
 import unittest
 import math
 class birdsEyeView():
+    """
+    The birdsEyeView Class. After this class is initialized by the simulator, the simulator can call 
+    the getBirdsEyeView function, which will return a grid containing the birdsEyeView. The simulator
+    will then send this birdsEyeView to any agent that requests it. 
+    """
     def __init__(self):
         self.lambdaDict = {}
         self.lambdaDict[0] = (lambda point: (point[0],point[1]) , lambda point: (point[0],point[1]) )
@@ -136,7 +142,6 @@ class birdsEyeView():
         
         :returns: the birds eye view of the whole field
         :rtype: a list of a list of doubles
-        
         """
         keeperPaths = []
         takerPaths = []
