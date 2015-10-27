@@ -58,6 +58,7 @@ class keepAway():
         #dimensions of the game are the same as the soccer field image
         self.__display_width = 550
         self.__display_height = 357
+        self.displayGraphics = True
         self.__field_center = (self.__display_width / 2 , self.__display_height / 2)
         #gameDisplay is a pygame.surface object. it's your screen
         self.gameDisplay = pygame.display.set_mode((self.__display_width,self.__display_height))
@@ -73,6 +74,8 @@ class keepAway():
         self.bev = birdsEyeView.birdsEyeView()
         #the simple state variables for agents like NEAT, novelty search, and maybe sarsa
         self.simpleStateVars = None
+        
+        self.alreadyTrained = False
         
         #setup all the initial keepers and takers. They are all starting at different field positions, which is why
         #you can't have a for loop just iterate and declare all of them
@@ -231,10 +234,14 @@ class keepAway():
         """
         This function will go and update the screen to display the next frame of 
         animation. This function should be called only after all the movement
-        of agents and the ball has been calculated. 
+        of agents and the ball has been calculated. If the self.displayGraphics
+        flag is set to false, no graphics will be displayed. This is so that training
+        potentially thousands of games will be quick.
         
         :returns: no return
-        """                    
+        """   
+        if (self.displayGraphics == False):
+            return                 
         #note: for blit function, give it column, row instead of row, column
         self.gameDisplay.blit(self.__worldImage, (0,0))
         
@@ -740,7 +747,7 @@ class keepAway():
     """THIS CODE IS FOR PRE-CALCULATING RECEIVE(), STATE VARIABLES, AND SENDING THEM"""
     
     #send all the state variables to the keepers and takers
-    def __sendSimpleStateVars(self):
+    def _sendSimpleStateVars(self):
         """
         This public function will send all keepers the simple state variables.
         This function should be called for intelligent agents such as NEAT, 
@@ -789,19 +796,19 @@ class keepAway():
             print("Values still out of range: varIndex11 = ", varIndex11, ", varIndex12 = ", varIndex12)
         return noisySimpleStateVars[:11] + (varIndex11, varIndex12)
     
-    def __sendBirdsEyeView(self):
+    def _sendBirdsEyeView(self):
         #get the state variables
         grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
         #send the state variables to each keeper
         for i in range(len(self.keeperArray)):
             self.keeperArray[i].receiveBirdsEyeView(grid)
             
-    def __sendNEATTraining(self, numEpisodes):
+    def _sendNEATTraining(self, numEpisodes):
         NEATTraining.train(self)
 
 
             
-    def __sendCalcReceiveDecision(self):
+    def _sendCalcReceiveDecision(self):
         """
         This public function will send all keepers the receive decision. For more information
         on what the receive decision is, refer to the documentation of the module "calcReceive"
@@ -924,19 +931,24 @@ class keepAway():
                         elif event.key == pygame.K_4:
                             self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
             elif (mode == "hand_coded"):
-                self.__sendCalcReceiveDecision()
-                self.__sendSimpleStateVars()
+                self._sendCalcReceiveDecision()
+                self._sendSimpleStateVars()
                 for keeper in self.keeperArray:
                     keeper.decisionFlowChart()
                 for taker in self.takerArray:
                     taker.decisionFlowChart()
             elif(mode == "neat"):
-                self.__sendCalcReceiveDecision()
-                self.__sendSimpleStateVars()
-                self.__sendNEATTraining()
+                self._sendCalcReceiveDecision()
+                self._sendSimpleStateVars()
+                if (self.alreadyTrained == False):
+                    self.alreadyTrained = self._sendNEATTraining()
+                for keeper in self.keeperArray:
+                    keeper.decisionFlowChart()
+                for taker in self.takerArray:
+                    taker.decisionFlowChart()
             elif(mode == "hyperneat"):
-                self.__sendCalcReceiveDecision()
-                self.__sendBirdsEyeView()
+                self._sendCalcReceiveDecision()
+                self._sendBirdsEyeView()
 
             #this is common code that will occur regardless of what agent you picked
             #if (self.fieldBall.inPosession == False):
