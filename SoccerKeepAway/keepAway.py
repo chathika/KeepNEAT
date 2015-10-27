@@ -1,7 +1,7 @@
 """
 This module contains keepAway, which is the simulator class. 
 """
-import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView, NEAT, hyperNEAT
+import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView, NEAT, hyperNEAT, NEATTraining
 import pygame, sys, math
 
 
@@ -71,6 +71,8 @@ class keepAway():
         
         #birdsEyeView generator for agents like hyperNEAT:
         self.bev = birdsEyeView.birdsEyeView()
+        #the simple state variables for agents like NEAT, novelty search, and maybe sarsa
+        self.simpleStateVars = None
         
         #setup all the initial keepers and takers. They are all starting at different field positions, which is why
         #you can't have a for loop just iterate and declare all of them
@@ -748,14 +750,14 @@ class keepAway():
         :returns: no return
         """  
         #get the state variables
-        currVars = getSimpleStateVars.getStateVarsKeepers(self.keeperArray, self.takerArray, self.__field_center)
+        self.simpleStateVars = getSimpleStateVars.getStateVarsKeepers(self.keeperArray, self.takerArray, self.__field_center)
         #send the state variables to each keeper and taker
         for i in range(len(self.keeperArray)):
-            noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
+            noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
             noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
             self.keeperArray[i].receiveSimpleStateVariables(noisyCurrVars)
         for i in range(len(self.takerArray)):
-            noisyCurrVars = kUtil.getNoisyVals(currVars, self.agentSigmaError)
+            noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
             noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
             self.takerArray[i].receiveSimpleStateVariables(noisyCurrVars)
     
@@ -793,6 +795,9 @@ class keepAway():
         #send the state variables to each keeper
         for i in range(len(self.keeperArray)):
             self.keeperArray[i].receiveBirdsEyeView(grid)
+            
+    def __sendNEATTraining(self, numEpisodes):
+        NEATTraining.train(self)
 
 
             
@@ -928,6 +933,7 @@ class keepAway():
             elif(mode == "neat"):
                 self.__sendCalcReceiveDecision()
                 self.__sendSimpleStateVars()
+                self.__sendNEATTraining()
             elif(mode == "hyperneat"):
                 self.__sendCalcReceiveDecision()
                 self.__sendBirdsEyeView()

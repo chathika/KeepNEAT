@@ -32,6 +32,8 @@ class runme():
         world.gameLoop(mode, turnOnGrid = True)
         world.pause("game over. Final Score: ", world.keeperScore)
         
+
+        
         
 if __name__ == "__main__":
     runme()
