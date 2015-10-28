@@ -163,6 +163,7 @@ def train(worldRef):
 		pop.Epoch()
 
 		print("Generation: ",generation)
+		print("Best Fitness", best)
 
 		generations = generation
 
