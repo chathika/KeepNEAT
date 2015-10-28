@@ -285,7 +285,7 @@ class agent():
         
         :returns: no return 
         """
-        #print("passing to keeper " +  str(integerK) + ", indexed by distance. ")
+        print("passing to keeper " +  str(integerK) + ", indexed by distance. ")
         #if you're passing to integerK = 1, then that means pass to the keeper that's closer to you
         #if you're passing ot integerK = 2, then that means pass to the keeper that's farther to you
         #0 is an invalid input
