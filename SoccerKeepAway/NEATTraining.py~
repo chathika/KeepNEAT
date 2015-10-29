@@ -142,7 +142,7 @@ def train(worldRef):
 	pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(1000):
+	for generation in range(5):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -156,14 +156,17 @@ def train(worldRef):
 		
 		
 		for i,gen in enumerate(genome_list):
-			fitness = evaluate(worldRef,gen,i)
-			gen.SetFitness(fitness)
+			fitness = 0
+			for j in range(5):
+				fitness += evaluate(worldRef,gen,i)
+			gen.SetFitness((fitness/5))
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])
+		best_genome_this_run = pop.Species[index].GetLeader()
 		if best > global_best:
-			best_genome_ever = pop.Species[index].GetLeader()
+			best_genome_ever = best_genome_this_run
 
-		evaluate(worldRef,best_genome_ever,index,True)
+		evaluate(worldRef,best_genome_this_run,index,True)
 
 		pop.Epoch()
 
@@ -184,6 +187,7 @@ def train(worldRef):
 	worldRef.displayGraphics = True
 
 	print("Ending Training")
+	worldRef.resetGameForTraining()
 	
 	return True
 

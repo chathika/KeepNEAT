@@ -805,7 +805,7 @@ class keepAway():
             
     def _sendNEATTraining(self):
 		NEATTraining.train(self)
-		return
+		return True
 
 
             
@@ -972,7 +972,7 @@ class keepAway():
 				self._sendCalcReceiveDecision()
 				self._sendBirdsEyeView()
 	
-			self.commonFunctionality(turnOnGrid)
+			self.commonFunctionality(True,turnOnGrid)
 		
 			if self.isGameOver() == True:
 				gameExit = True
