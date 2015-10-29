@@ -55,7 +55,8 @@ params.MultipointCrossoverRate = 0.4
 params.SurvivalRate = 0.2
 
 
-def evaluate(worldRef, genome, i):
+
+def evaluate(worldRef, genome, i, display = False):
 	screen = pygame.display.set_mode((600, 600))
 	space = pm.Space()
 	clock = pygame.time.Clock()
@@ -66,10 +67,7 @@ def evaluate(worldRef, genome, i):
 	worldRef.resetGameForTraining()
 	#print("Game reset for training")
 	#counter = 0
-	if(i%100 == 0):
-		showDisplay = True
-	else:
-		showDisplay = False
+	showDisplay = display
 	while worldRef.isGameOver() == False:
 		#print("Entering while game is not over for ",counter,"  time")
 		#counter += 1
@@ -101,7 +99,7 @@ def evaluate(worldRef, genome, i):
 			worldRef.displayScore()
 			pygame.display.update()
 		'''
-		if(i%100 == 0):
+		if(display):
 			# draw the phenotype
 			img = np.zeros((250, 250, 3), dtype=np.uint8)
 			img += 10
@@ -140,6 +138,7 @@ def train(worldRef):
 	pop = NEAT.Population(g, params, True, 1.0,i)
 	pop.RNG.Seed(i)
 	generations = 0
+	global_best = 0
 	for generation in range(1000):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
@@ -158,7 +157,10 @@ def train(worldRef):
 			gen.SetFitness(fitness)
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])
-		best_genome_ever = pop.Species[index].GetLeader()
+		if best > global_best:
+			best_genome_ever = pop.Species[index].GetLeader()
+
+		evaluate(worldRef,best_genome_ever,index,True)
 
 		pop.Epoch()
 
