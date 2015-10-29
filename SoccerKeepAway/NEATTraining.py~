@@ -18,6 +18,7 @@ from pymunk.pygame_util import draw, from_pygame
 params = NEAT.Parameters()
 params.PopulationSize = 150
 params.DynamicCompatibility = True
+params.AllowClones = True
 params.WeightDiffCoeff = 4.0
 params.CompatTreshold = 2.0
 params.YoungAgeTreshold = 15
@@ -53,6 +54,8 @@ params.ActivationFunction_SignedStep_Prob = 0.0
 params.CrossoverRate = 0.75  # mutate only 0.25
 params.MultipointCrossoverRate = 0.4
 params.SurvivalRate = 0.2
+
+params.Elitism = 0.1
 
 
 
