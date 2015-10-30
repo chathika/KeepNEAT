@@ -16,7 +16,9 @@ class birdsEyeView():
     the getBirdsEyeView function, which will return a grid containing the birdsEyeView. The simulator
     will then send this birdsEyeView to any agent that requests it. 
     """
-    def __init__(self):
+    def __init__(self, block_size = 23, ball_size = 12):
+        self.__block_size = block_size
+        self.__ball_size = ball_size
         self.lambdaDict = {}
         self.lambdaDict[0] = (lambda point: (point[0],point[1]) , lambda point: (point[0],point[1]) )
         self.lambdaDict[1] = (lambda point: (point[1], point[0]) , lambda point: (point[1], point[0]) )
@@ -27,7 +29,28 @@ class birdsEyeView():
         self.lambdaDict[6] = ( lambda point: (-point[1], point[0]) , lambda point: (point[1], -point[0]) )
         self.lambdaDict[7] = ( lambda point: (point[0], -point[1]) , lambda point: (point[0], -point[1]) )
 
-
+    
+    def getAgentBlockSize(self):
+        """
+        Get the length/height of the square tiles used here
+        
+        :returns: the tile height/width for a tile on the birdseye view
+        
+        :rtype: integer
+        """
+        return self.__block_size
+    
+    def getBallSize(self):
+        """
+        Get the length/height of the square tile that represents the ball. While the ball tile is never used
+        in the birdseye view, it's useful to have this function for other class that require both a birdeyeview,
+        and would need the block size of the ball to determine where the center of the ball is.
+        
+        :returns: the tile height/width of the ball
+        
+        :rtype: integer
+        """
+        return self.__ball_size
 
     def getOctant(self, pointOne, pointTwo):
         (x0,y0) = pointOne
@@ -112,12 +135,12 @@ class birdsEyeView():
     
     
     #getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.display_height, self.__agent_block_size)
-    def __convertToTile(self, coord, blocksize):
+    def __convertToTile(self, coord):
         #print("orig coord: ", coord)
         #print("new tile: ", ( math.floor(coord[0]/blocksize), math.floor(coord[1]/blocksize) ))
-        return ( math.floor(coord[0]/blocksize), math.floor(coord[1]/blocksize) )
+        return ( math.floor(coord[0]/self.__block_size), math.floor(coord[1]/self.__block_size) )
     
-    def getBirdsEyeView(self, keeperArray, takerArray, display_width, display_height, block_size):
+    def getBirdsEyeView(self, keeperArray, takerArray, display_width, display_height):
         """
         This function will take in the array of keepers, takers, the display width of the simulator, 
         the display height of the simulator, and the block size that you want to make the tiles. Note:
@@ -132,13 +155,11 @@ class birdsEyeView():
         :param takerArray: the array of all takers
         :param display_width: the width of the simulator field in pixels
         :param display_height: the height of the simuator field in pixels
-        :param block_size: the side length of the square tiles that will form the birds eye view
         
         :type keeperArray: an array of keepers, each keeper being of type agent (or a subclass of agent)
         :type takerArray: an array of takers, each taker being of type agent (or a subclass of agent)
         :type display_width: an integer
         :type display_height: an integer
-        :type block_size: an integer
         
         :returns: the birds eye view of the whole field
         :rtype: a list of a list of doubles
@@ -148,20 +169,20 @@ class birdsEyeView():
         takerPositions = []
         keeperPositions = []
         sortedKeepers = sorted(keeperArray)
-        keeperPositions.append(self.__convertToTile(sortedKeepers[0].getNoisyMidPoint(), block_size))
+        keeperPositions.append(self.__convertToTile(sortedKeepers[0].getNoisyMidPoint(), self.__block_size))
         for i in range(1, len(keeperArray)):
-            keeperPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), block_size), 
-                         self.__convertToTile( sortedKeepers[i].getNoisyMidPoint(), block_size) ) ) )
-            keeperPositions.append(self.__convertToTile(sortedKeepers[i].getNoisyMidPoint(), block_size))
+            keeperPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), self.__block_size), 
+                         self.__convertToTile( sortedKeepers[i].getNoisyMidPoint(), self.__block_size) ) ) )
+            keeperPositions.append(self.__convertToTile(sortedKeepers[i].getNoisyMidPoint(), self.__block_size))
             
         for i in range(len(takerArray)):
-            takerPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), block_size), 
-                         self.__convertToTile( takerArray[i].getNoisyMidPoint(), block_size) ) ) )
-            takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint(), block_size))
+            takerPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), self.__block_size), 
+                         self.__convertToTile( takerArray[i].getNoisyMidPoint(), self.__block_size) ) ) )
+            takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint(), self.__block_size))
         returnGrid = [] #access values as row, col
-        for i in range(int(math.ceil(display_height/block_size))):
+        for i in range(int(math.ceil(display_height/self.__block_size))):
             returnGrid.append([]) 
-            for j in range(int(math.ceil(display_width/block_size)) ):
+            for j in range(int(math.ceil(display_width/self.__block_size)) ):
                 returnGrid[i].append(0.0) 
                 
         for path in takerPaths:
