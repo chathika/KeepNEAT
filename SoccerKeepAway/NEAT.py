@@ -31,7 +31,7 @@ class NEAT(agent.agent):
 		#print("Entering decision function")
 		self.NN.Flush()
 		self.NN.Input(np.array(self.stateVariables+(1,))) # can input numpy arrays, too
-		                              # for some reason only np.float64 is supported
+														# for some reason only np.float64 is supported
 		for _ in range(2):
 			self.NN.Activate()
 		o = self.NN.Output()
@@ -54,6 +54,4 @@ class NEAT(agent.agent):
 
 	def receiveBest(self, NN):
 		self.NN = NN
-			            
 
-			    

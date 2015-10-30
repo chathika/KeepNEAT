@@ -2,6 +2,7 @@
 This module contains the hyperNEAT agent class. 
 """
 import agent, kUtil
+import numpy as np
 
 class hyperNEAT(agent.agent):
 	"""
