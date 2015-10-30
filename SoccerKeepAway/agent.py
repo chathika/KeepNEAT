@@ -57,7 +57,11 @@ class agent():
         self.agentListIndex = None
         self.stateVariables = None
         self.onReceiveDecision = None #receive variables
-        self.birdsEyeView = None #the birds eye view for the hyperNEAT agent
+        
+        #these are variables for the hyperNEAT agent
+        self.bevGrid = None
+        self.bevList = None
+        self.bevSubstrate = None
         self.worldRef = worldRef
         
         #BALL VARIABLES
@@ -147,7 +151,7 @@ class agent():
         """
         self.stateVariables = noisyVariables
         
-    def receiveBirdsEyeView(self, grid):
+    def receiveBirdsEyeView(self, grid, bevList, substrate):
         """
         The simulator will call this function in order to give the agent class
         a the birds eye view of the field
@@ -161,7 +165,9 @@ class agent():
         
         :returns: no return
         """
-        self.birdsEyeView = grid
+        self.bevGrid = grid
+        self.bevList = bevList
+        self.bevSubstrate = substrate
     
     #used only in keepaway.py   
     def receiveDecision(self, rDecision):

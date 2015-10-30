@@ -104,8 +104,9 @@ class keepAway():
 		
 		#birdsEyeView generator for agents like hyperNEAT:
 		self.bev = birdsEyeView.birdsEyeView(self.__agent_block_size, self.__ball_block_size)
-		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -808,10 +809,12 @@ class keepAway():
 
 	def _sendBirdsEyeView(self):
 		#get the state variables
-		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid)
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_subsrate)
 
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)

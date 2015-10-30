@@ -22,17 +22,16 @@ class hyperNEAT(agent.agent):
 		self.NN = NN
 		
 	#hyperNEAT has it's own passball function which will override the default
-	def _passBall(self, tileToPassTo):
+	def _passBall(self, pointToPassTo):
 		"""
 		If a keeper currently has the ball, then it has the option to hold the ball,
-		or pass it. Call this function to pass the ball. Point is the coordinate that
-		the keeper can pass to. Do not define pixel coordinates. Define the coordinate
-		as the upper left coordinate of the tile that you're passing the ball to. 
+		or pass it. Call this function to pass the ball. pointToPassTo is the coordinate that
+		the keeper can pass to. these are pixel values 
 		
-		:param tileToPassTo: the tile that the agent is passing to. It is an XY coordinate defined to be the top left 
+		:param pointToPassTo: the tile that the agent is passing to. It is an XY coordinate defined to be the top left 
 			corner of the tile you're trying to pass to
 		
-		:type tileToPassTo: typle of int
+		:type pointToPassTo: typle of int
 		
 		:returns: no return 
 		"""
@@ -41,7 +40,7 @@ class hyperNEAT(agent.agent):
 			return
 		
 		#pass to team mate integerK. if integerK = 1, then it's the 2nd element in array
-		selfToTargetDirection = kUtil.unitVector(kUtil.getVector(self.__getBallCenter(self.noisyBallPos), self.__getAgentCenter(tileToPassTo)))
+		selfToTargetDirection = kUtil.unitVector(kUtil.getVector(self.__getBallCenter(self.noisyBallPos), pointToPassTo))
 		selfToTargetVector = (kUtil.scalarMultiply(self.fieldBall.maxBallSpeed, selfToTargetDirection))
 
 				
@@ -51,13 +50,10 @@ class hyperNEAT(agent.agent):
 		self.inPosession = False
 		self.isKicking = True
 		#kUtil.addVectorToPoint(self.fieldBall.trueBallPos, selfToTeammateVector)
-		self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTargetVector, self.__sigma))
+		self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTargetVector, self.getSigma()))
 		
 	def __getBallCenter(self, ballTopLeft):
-		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size/2))
-	
-	def __getAgentCenter(self, agentTopLeft):
-		return ( agentTopLeft[0] + (self.worldRef.get_agent_block_size/2), agentTopLeft[1] + (self.worldRef.get_agent_block_size/2) )
+		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size()/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size()/2))
 
 	def _decisionFunction(self):
 		"""
@@ -78,9 +74,9 @@ class hyperNEAT(agent.agent):
 		if i==0:
 			self._holdBall()
 		elif i==1:
-			self._passBall(1)
+			self._passBall( (self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2) )
 		else:
-			self._passBall(2)
+			self._passBall((self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2))
 
 		#print("The decision is: ",i)
 
