@@ -84,31 +84,8 @@ rng.TimeSeed()
 
 
 
-substrate = NEAT.Substrate([(-1., -1., 0.0), (-.5, -1., 0.0), (0.0, -1., 0.0),
-                            (.5, -1., 0.0), (1.0, -1., 0.0), (0.0, -1.0, -1.0),
-    ],
-                           [],
-                           [(-1., 1., 0.0), (1.0,1.0,0.0)])
 
-substrate.m_allow_input_hidden_links = False
-substrate.m_allow_input_output_links = False
-substrate.m_allow_hidden_hidden_links = False
-substrate.m_allow_hidden_output_links = False
-substrate.m_allow_output_hidden_links = False
-substrate.m_allow_output_output_links = False
-substrate.m_allow_looped_hidden_links = False
-substrate.m_allow_looped_output_links = False
-
-# let's set the activation functions
-substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
-substrate.m_output_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
-
-# when to output a link and max weight
-substrate.m_link_threshold = 0.2
-substrate.m_max_weight_and_bias = 8.0
-
-
-def evaluate(worldRef, genome, i, display = False):
+def evaluate(worldRef, genome, substrate, i, display = False):
 	screen = pygame.display.set_mode((600, 600))
 	space = pm.Space()
 	clock = pygame.time.Clock()
@@ -197,6 +174,30 @@ def train(worldRef):
 				print("Fitness: ",i.GetFitness())
 	else:
 	'''
+	substrate = NEAT.Substrate([(-1., -1., 0.0), (-.5, -1., 0.0), (0.0, -1., 0.0),
+                            (.5, -1., 0.0), (1.0, -1., 0.0), (0.0, -1.0, -1.0),
+    ],
+                           [],
+                           [(-1., 1., 0.0), (1.0,1.0,0.0)])
+
+	substrate.m_allow_input_hidden_links = False
+	substrate.m_allow_input_output_links = False
+	substrate.m_allow_hidden_hidden_links = False
+	substrate.m_allow_hidden_output_links = False
+	substrate.m_allow_output_hidden_links = False
+	substrate.m_allow_output_output_links = False
+	substrate.m_allow_looped_hidden_links = False
+	substrate.m_allow_looped_output_links = False
+
+	# let's set the activation functions
+	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+	substrate.m_output_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+
+	# when to output a link and max weight
+	substrate.m_link_threshold = 0.2
+	substrate.m_max_weight_and_bias = 8.0
+	
+	
 	g = NEAT.Genome(0,
                     substrate.GetMinCPPNInputs(),
                     0,
@@ -227,7 +228,7 @@ def train(worldRef):
 		for i,gen in enumerate(genome_list):
 			fitness = 0
 			for j in range(5):
-				fitness += evaluate(worldRef,gen,i)
+				fitness += evaluate(worldRef,gen,substrate,i)
 			gen.SetFitness((fitness/5))
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])

@@ -139,10 +139,14 @@ def train(worldRef):
 
 	print("Entering training")
 	i=1
-	fileExists = os.path.isfile('NEAT_Population/population')
+	fileExists = os.path.isfile('NEAT_Population/population.txt')
+	#fileExists = os.path.isfile('NEAT_Population/genome.txt')
 	if fileExists:
 		print("There is a previous stored population, loading it")
-		pop = NEAT.Population('NEAT_Population/population')
+		#f = open('NEAT_Population/population.txt', 'r')
+		#print (f)
+		pop = NEAT.Population('NEAT_Population/population.txt')
+		#g = NEAT.Genome('NEAT_Population/genome.txt')
 		'''		
 		print("Printing loaded popuation")
 		for s in pop.Species:
@@ -151,8 +155,8 @@ def train(worldRef):
 		'''
 	else:
 		g = NEAT.Genome(0, 14, 0, 3, False, NEAT.ActivationFunction.UNSIGNED_SIGMOID, NEAT.ActivationFunction.UNSIGNED_SIGMOID, 0, params)
-	pop = NEAT.Population(g, params, True, 1.0,i)
-	pop.RNG.Seed(i)
+		pop = NEAT.Population(g, params, True, 1.0,i)
+		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
 	for generation in range(2):
@@ -200,14 +204,16 @@ def train(worldRef):
 	worldRef.displayGraphics = True
 
 	print("Ending Training")
-	
+	'''
 	print("About to store pickle object")
 	print("Printing population before storing:")
 	for s in pop.Species:
 		for i in s.Individuals:
 			print("Fitness: ",i.GetFitness())
-	pop.Save('NEAT_Population/population')
+	'''
+	pop.Save('NEAT_Population/population.txt')
 	
+	#best_genome_ever.Save('NEAT_Population/genome.txt')
 
 	worldRef.resetGameForTraining()
 	
