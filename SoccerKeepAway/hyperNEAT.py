@@ -28,8 +28,8 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(np.array(self.stateVariables+(1,))) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
-		for _ in range(2):
-			self.NN.Activate()
+		#for _ in range(2):
+		self.NN.Activate()
 		o = self.NN.Output()
 
 		#print(len(o))

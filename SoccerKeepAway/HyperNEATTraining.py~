@@ -22,44 +22,90 @@ params = NEAT.Parameters()
 params.PopulationSize = 150
 params.DynamicCompatibility = True
 params.AllowClones = True
-params.WeightDiffCoeff = 4.0
-params.CompatTreshold = 2.0
+params.CompatTreshold = 5.0
+params.CompatTresholdModifier = 0.3
 params.YoungAgeTreshold = 15
-params.SpeciesMaxStagnation = 15
+params.SpeciesMaxStagnation = 100
 params.OldAgeTreshold = 35
-params.MinSpecies = 5
-params.MaxSpecies = 25
-params.RouletteWheelSelection = False  #Original value = False
+params.MinSpecies = 3
+params.MaxSpecies = 10
+params.RouletteWheelSelection = True
 params.RecurrentProb = 0.0
-params.OverallMutationRate = 0.8
-
+params.OverallMutationRate = 0.02
 params.MutateWeightsProb = 0.90
-
-params.WeightMutationMaxPower = 2.5
+params.WeightMutationMaxPower = 1.0
 params.WeightReplacementMaxPower = 5.0
 params.MutateWeightsSevereProb = 0.5
-params.WeightMutationRate = 0.25
-
-params.MaxWeight = 8
-
-params.MutateAddNeuronProb = 0.03
-params.MutateAddLinkProb = 0.05
-params.MutateRemLinkProb = 0.0
-
-params.MinActivationA  = 4.9
-params.MaxActivationA  = 4.9
-
-params.ActivationFunction_SignedSigmoid_Prob = 0.0
-params.ActivationFunction_UnsignedSigmoid_Prob = 1.0
-params.ActivationFunction_Tanh_Prob = 0.0
-params.ActivationFunction_SignedStep_Prob = 0.0
-
-params.CrossoverRate = 0.75  # mutate only 0.25
-params.MultipointCrossoverRate = 0.4
-params.SurvivalRate = 0.2
-
+params.WeightMutationRate = 0.75
+params.MaxWeight = 20
+params.MutateAddNeuronProb = 0.01
+params.MutateAddLinkProb = 0.02
+params.MutateRemLinkProb = 0.00
+params.DivisionThreshold = 0.5
+params.VarianceThreshold = 0.03
+params.BandThreshold = 0.3
+params.InitialDepth = 3
+params.MaxDepth = 4
+params.IterationLevel = 1
+params.Leo = True
+params.GeometrySeed = True
+params.LeoSeed = True
+params.LeoThreshold = 0.3
+params.CPPN_Bias = -3.0
+params.Qtree_X = 0.0
+params.Qtree_Y = 0.0
+params.Width = 1.
+params.Height = 1.
 params.Elitism = 0.1
+params.CrossoverRate = 0.5
+params.MutateWeightsSevereProb = 0.01
+params.MutateActivationAProb = 0.0;
+params.ActivationAMutationMaxPower = 0.5;
+params.MinActivationA = 0.05;
+params.MaxActivationA = 6.0;
 
+params.MutateNeuronActivationTypeProb = 0.03;
+
+params.ActivationFunction_SignedSigmoid_Prob = 0.0;
+params.ActivationFunction_UnsignedSigmoid_Prob = 0.0;
+params.ActivationFunction_Tanh_Prob = 1.0;
+params.ActivationFunction_TanhCubic_Prob = 0.0;
+params.ActivationFunction_SignedStep_Prob = 1.0;
+params.ActivationFunction_UnsignedStep_Prob = 0.0;
+params.ActivationFunction_SignedGauss_Prob = 1.0;
+params.ActivationFunction_UnsignedGauss_Prob = 0.0;
+params.ActivationFunction_Abs_Prob = 0.0;
+params.ActivationFunction_SignedSine_Prob = 1.0;
+params.ActivationFunction_UnsignedSine_Prob = 0.0;
+params.ActivationFunction_Linear_Prob = 1.0;
+
+rng = NEAT.RNG()
+rng.TimeSeed()
+
+
+
+substrate = NEAT.Substrate([(-1., -1., 0.0), (-.5, -1., 0.0), (0.0, -1., 0.0),
+                            (.5, -1., 0.0), (1.0, -1., 0.0), (0.0, -1.0, -1.0),
+    ],
+                           [],
+                           [(-1., 1., 0.0), (1.0,1.0,0.0)])
+
+substrate.m_allow_input_hidden_links = False
+substrate.m_allow_input_output_links = False
+substrate.m_allow_hidden_hidden_links = False
+substrate.m_allow_hidden_output_links = False
+substrate.m_allow_output_hidden_links = False
+substrate.m_allow_output_output_links = False
+substrate.m_allow_looped_hidden_links = False
+substrate.m_allow_looped_output_links = False
+
+# let's set the activation functions
+substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+substrate.m_output_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+
+# when to output a link and max weight
+substrate.m_link_threshold = 0.2
+substrate.m_max_weight_and_bias = 8.0
 
 
 def evaluate(worldRef, genome, i, display = False):
@@ -68,7 +114,7 @@ def evaluate(worldRef, genome, i, display = False):
 	clock = pygame.time.Clock()
 	#print("Starting evaluation ",i)
 	net = NEAT.NeuralNetwork()
-	genome.BuildPhenotype(net)
+	genome.BuildHyperNEATPhenotype(net, substrate)
 	worldRef.displayGraphics = True
 	worldRef.resetGameForTraining()
 	#print("Game reset for training")
@@ -139,23 +185,33 @@ def train(worldRef):
 
 	print("Entering training")
 	i=1
+	'''
 	fileExists = os.path.isfile('NEAT_Population/population')
 	if fileExists:
 		print("There is a previous stored population, loading it")
-		pop = NEAT.Population('NEAT_Population/population')
-		'''		
+		with open('NEAT_Population/population', 'rb') as f:
+			pop = cPickle.load(f)
 		print("Printing loaded popuation")
 		for s in pop.Species:
 			for i in s.Individuals:
 				print("Fitness: ",i.GetFitness())
-		'''
 	else:
-		g = NEAT.Genome(0, 14, 0, 3, False, NEAT.ActivationFunction.UNSIGNED_SIGMOID, NEAT.ActivationFunction.UNSIGNED_SIGMOID, 0, params)
+	'''
+	g = NEAT.Genome(0,
+                    substrate.GetMinCPPNInputs(),
+                    0,
+                    substrate.GetMinCPPNOutputs(),
+                    False,
+                    NEAT.ActivationFunction.TANH,
+                    NEAT.ActivationFunction.TANH,
+                    0,
+                    params)
+
 	pop = NEAT.Population(g, params, True, 1.0,i)
 	pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(2):
+	for generation in range(1):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -200,16 +256,17 @@ def train(worldRef):
 	worldRef.displayGraphics = True
 
 	print("Ending Training")
-	
+	'''
 	print("About to store pickle object")
 	print("Printing population before storing:")
 	for s in pop.Species:
 		for i in s.Individuals:
 			print("Fitness: ",i.GetFitness())
-	pop.Save('NEAT_Population/population')
-	
+	with open('NEAT_Population/population', 'wb') as f:
+            cPickle.dump(pop, f)
+	'''
 
-	worldRef.resetGameForTraining()
+	worldRef.reseGameForTraining()
 	
 	return True
 

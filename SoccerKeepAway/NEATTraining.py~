@@ -15,6 +15,9 @@ import pymunk as pm
 from pymunk import Vec2d
 from pymunk.pygame_util import draw, from_pygame
 
+import cPickle
+import os.path
+
 params = NEAT.Parameters()
 params.PopulationSize = 150
 params.DynamicCompatibility = True
@@ -104,9 +107,9 @@ def evaluate(worldRef, genome, i, display = False):
 		'''
 		if(display):
 			# draw the phenotype
-			img = np.zeros((250, 250, 3), dtype=np.uint8)
+			img = np.zeros((450, 450, 3), dtype=np.uint8)
 			img += 10
-			NEAT.DrawPhenotype(img, (0, 0, 250, 250), net )
+			NEAT.DrawPhenotype(img, (0, 0, 450, 450), net )
 			cv2.imshow("current best", img)
 			cv2.waitKey(1)
 
@@ -118,7 +121,7 @@ def evaluate(worldRef, genome, i, display = False):
 
 			### Flip screen
 			pygame.display.flip()
-			clock.tick(50)
+			clock.tick(10000)
 
 
 		worldRef.commonFunctionality(showDisplay)
@@ -136,13 +139,23 @@ def train(worldRef):
 
 	print("Entering training")
 	i=1
-
-	g = NEAT.Genome(0, 14, 0, 3, False, NEAT.ActivationFunction.UNSIGNED_SIGMOID, NEAT.ActivationFunction.UNSIGNED_SIGMOID, 0, params)
+	fileExists = os.path.isfile('NEAT_Population/population')
+	if fileExists:
+		print("There is a previous stored population, loading it")
+		pop = NEAT.Population('NEAT_Population/population')
+		'''		
+		print("Printing loaded popuation")
+		for s in pop.Species:
+			for i in s.Individuals:
+				print("Fitness: ",i.GetFitness())
+		'''
+	else:
+		g = NEAT.Genome(0, 14, 0, 3, False, NEAT.ActivationFunction.UNSIGNED_SIGMOID, NEAT.ActivationFunction.UNSIGNED_SIGMOID, 0, params)
 	pop = NEAT.Population(g, params, True, 1.0,i)
 	pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(5):
+	for generation in range(2):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -187,6 +200,15 @@ def train(worldRef):
 	worldRef.displayGraphics = True
 
 	print("Ending Training")
+	
+	print("About to store pickle object")
+	print("Printing population before storing:")
+	for s in pop.Species:
+		for i in s.Individuals:
+			print("Fitness: ",i.GetFitness())
+	pop.Save('NEAT_Population/population')
+	
+
 	worldRef.resetGameForTraining()
 	
 	return True
