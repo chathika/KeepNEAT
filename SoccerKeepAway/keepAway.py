@@ -1,8 +1,9 @@
 """
 This module contains keepAway, which is the simulator class. 
 """
-import kUtil, agent, ball, getSimpleStateVars, handCoded, random, calcReceive, birdsEyeView, NEAT, hyperNEAT, NEATTraining, HyperNEATTraining
+import kUtil, agent, ball, getSimpleStateVars, handCoded, calcReceive, birdsEyeView, NEAT, hyperNEAT, NEATTraining, HyperNEATTraining
 import pygame, sys, math
+from statistics import mode
 
 
 
@@ -159,13 +160,13 @@ class keepAway():
 		:returns: no return
 		"""
 		if size == "small":
-		    textSurface = self.smallfont.render(text, True, color)
+			textSurface = self.smallfont.render(text, True, color)
 		elif size == "medium":
-		    textSurface = self.medfont.render(text, True, color)
+			textSurface = self.medfont.render(text, True, color)
 		elif size == "large":
-		    textSurface = self.largefont.render(text, True, color)
+			textSurface = self.largefont.render(text, True, color)
 		elif size == "verysmall":
-		    textSurface = self.verysmallfont.render(text,True,color)
+			textSurface = self.verysmallfont.render(text,True,color)
 		return textSurface, textSurface.get_rect()
 		
 	def __displayScore(self):
@@ -178,7 +179,7 @@ class keepAway():
 		text= self.verysmallfont.render("Keeper Reward: "+ str(self.keeperScore), True, self.__black)
 		
 		self.gameDisplay.blit(text, [0,0]) 
-		       
+
 	def pause(self, message):
 		"""
 		This function will pause the simulation and display a message to the
@@ -194,18 +195,18 @@ class keepAway():
 		print(message) 
 		print("Press space to continue. Press E to exit") 
 		while paused:
-		    for event in pygame.event.get():
-		        if event.type == pygame.QUIT:
-		            pygame.quit()
-		            sys.exit(0)
-		        if event.type == pygame.KEYDOWN:
-		            if event.key == pygame.K_SPACE:
-		                paused = False
-		            elif event.key == pygame.K_e:
-		                pygame.quit()
-		                sys.exit(0)
-		    #gameDisplay.fill(white)
-		    self.clock.tick(10) 
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					sys.exit(0)
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_SPACE:
+						paused = False
+					elif event.key == pygame.K_e:
+						pygame.quit()
+						sys.exit(0)
+			#gameDisplay.fill(white)
+			self.clock.tick(10) 
 		
 	def __finish(self):
 		"""
@@ -222,15 +223,15 @@ class keepAway():
 		                  50)
 		pygame.display.update()
 		while paused:
-		    for event in pygame.event.get():
-		        if event.type == pygame.QUIT:
-		            self.__exitSim()
-		        if event.type == pygame.KEYDOWN:
-		            if event.key == pygame.K_q:
-		                self.__exitSim()
-		    #gameDisplay.fill(white)
-		    self.clock.tick(10)
-		    
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					self.__exitSim()
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_q:
+						self.__exitSim()
+			#gameDisplay.fill(white)
+			self.clock.tick(10)
+
 
 	def __drawWorld (self, grid = None):
 		"""
@@ -243,47 +244,47 @@ class keepAway():
 		:returns: no return
 		"""   
 		if (self.displayGraphics == False):
-		    return                 
+			return                 
 		#note: for blit function, give it column, row instead of row, column
 		self.gameDisplay.blit(self.__worldImage, (0,0))
 		
 		if (grid != None):
-		    self.__drawBirdsEyeView(grid)
+			self.__drawBirdsEyeView(grid)
 		
 		for i in range(len(self.keeperArray)):
-		    self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
-		    """
-		    #this is for debugging. comment this out later
-		    if (self.rDecision != None):
-		        if (i == self.rDecision[0]):
-		            self.gameDisplay.blit(self.__keeperGoldImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
-		    """
+			self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
+			"""
+			#this is for debugging. comment this out later
+			if (self.rDecision != None):
+			    if (i == self.rDecision[0]):
+			        self.gameDisplay.blit(self.__keeperGoldImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
+			"""
 		for i in range(len(self.takerArray)):
-		    self.gameDisplay.blit(self.__takerImage, (self.takerTruePosArray[i][1], self.takerTruePosArray[i][0]))
+			self.gameDisplay.blit(self.__takerImage, (self.takerTruePosArray[i][1], self.takerTruePosArray[i][0]))
 		self.gameDisplay.blit(self.__ballImage, (self.fieldBall.trueBallPos[1], self.fieldBall.trueBallPos[0]))
 		#this is to display the predicted intersection point of a ball
 		#you may want to comment this code out after debugging is done
 		if (self.keeperArray[0].onReceiveDecision != None):
-		    self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
+			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
 
 	def __drawBirdsEyeView(self, grid):
 		for i in range(len(grid)):
-		    for j in range(len(grid[i])):
-		        if grid[i][j] == 0.0:
-		            self.gameDisplay.blit(self.__debugEmptyTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-		        if grid[i][j] == -1.0:
-		            self.gameDisplay.blit(self.__debugTakerTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-		        if grid[i][j] == 1.0:
-		            self.gameDisplay.blit(self.__debugKeeperTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-		        if grid[i][j] == 0.3:
-		            self.gameDisplay.blit(self.__debugKeeperPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		        if grid[i][j] == -0.3:
-		            self.gameDisplay.blit(self.__debugTakerPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		        if grid[i][j] == -0.6:
-		            self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		        if grid[i][j] == 0.6:
-		            self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		            
+			for j in range(len(grid[i])):
+				if grid[i][j] == 0.0:
+					self.gameDisplay.blit(self.__debugEmptyTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+				if grid[i][j] == -1.0:
+					self.gameDisplay.blit(self.__debugTakerTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+				if grid[i][j] == 1.0:
+					self.gameDisplay.blit(self.__debugKeeperTile, (j*self.__agent_block_size,i*self.__agent_block_size))
+				if grid[i][j] == 0.3:
+					self.gameDisplay.blit(self.__debugKeeperPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+				if grid[i][j] == -0.3:
+					self.gameDisplay.blit(self.__debugTakerPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+				if grid[i][j] == -0.6:
+					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+				if grid[i][j] == 0.6:
+					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+
 
 	def __updateScore(self):
 		"""
@@ -293,7 +294,7 @@ class keepAway():
 		:returns: no return
 		"""
 		if self.fieldBall.inPosession:
-		    self.keeperScore += 1
+			self.keeperScore += 1
 		
 	def debugPassVectors(self, startPoint, vectors):
 		"""
@@ -315,9 +316,9 @@ class keepAway():
 		self.worldRef.__displayScore()
 		print("Starting point: ", startPoint) 
 		for vector in vectors:
-		    newVector = kUtil.addVectorToPoint(startPoint, kUtil.scalarMultiply(5, vector))
-		    print("printing vector: ", newVector)
-		    self.worldRef.gameDisplay.blit(self.worldRef.__debugYellowDotImage, (newVector[1], newVector[0]))
+			newVector = kUtil.addVectorToPoint(startPoint, kUtil.scalarMultiply(5, vector))
+			print("printing vector: ", newVector)
+			self.worldRef.gameDisplay.blit(self.worldRef.__debugYellowDotImage, (newVector[1], newVector[0]))
 		self.worldRef.gameDisplay.blit(self.worldRef.__debugRedDotImage, (startPoint[1], startPoint[0]))
 		pygame.display.update()
 		print("debugging")
@@ -374,16 +375,16 @@ class keepAway():
 		#print setOfLegalQuads 
 		#print "quad:", quad
 		if quad in setOfLegalQuads:
-		    #move is legal, do it
-		    self.__moveAgent(inputAgent, kUtil.scalarMultiply ( distance, kUtil.unitVector(noiseFreeDirectionVector)))
+			#move is legal, do it
+			self.__moveAgent(inputAgent, kUtil.scalarMultiply ( distance, kUtil.unitVector(noiseFreeDirectionVector)))
 		else:
-		    #move is illegal. Simply return without calling or updating anything
-		    #print "Illegal move: ", reversedPolarCoord 
-		    return False
+			#move is illegal. Simply return without calling or updating anything
+			#print "Illegal move: ", reversedPolarCoord 
+			return False
 		if kUtil.magnitude(noiseFreeDirectionVector) == 0.0:
-		    return False
+			return False
 		else:
-		    return True
+			return True
 	#if a move is determined to be legal, this function will move the agnet
 	def __moveAgent(self, inputAgent, movementVector):
 		"""
@@ -407,12 +408,12 @@ class keepAway():
 		    Only the move_attempt() function should be called.  
 		"""
 		if inputAgent.getAgentType() == "keeper":
-		    newNoiseFreePos = kUtil.addVectorToPoint(self.keeperTruePosArray[inputAgent.getSimIndex()], movementVector)
-		    self.keeperTruePosArray[inputAgent.getSimIndex()] = newNoiseFreePos
+			newNoiseFreePos = kUtil.addVectorToPoint(self.keeperTruePosArray[inputAgent.getSimIndex()], movementVector)
+			self.keeperTruePosArray[inputAgent.getSimIndex()] = newNoiseFreePos
 		elif inputAgent.getAgentType() == "taker":
-		    newNoiseFreePos = kUtil.addVectorToPoint(self.takerTruePosArray[inputAgent.getSimIndex()], movementVector)
-		    self.takerTruePosArray[inputAgent.getSimIndex()] = newNoiseFreePos
-		    
+			newNoiseFreePos = kUtil.addVectorToPoint(self.takerTruePosArray[inputAgent.getSimIndex()], movementVector)
+			self.takerTruePosArray[inputAgent.getSimIndex()] = newNoiseFreePos
+
 		inputAgent.updateAgentPosition(kUtil.getNoisyVals(newNoiseFreePos, self.agentSigmaError))    
 	#internal function. determine which quadrant the agent is trying to move to
 	def __getQuadAttemptingToMoveTo(self, agent, noiseFreeDirectionVector):
@@ -442,17 +443,17 @@ class keepAway():
 		#print "angleInRadians:", angleInRadians, " for y = ", y, "and x = ", x 
 		quadrantToMoveTo = None
 		if angleInRadians >= 0.0 and angleInRadians <= math.pi / 2.0:
-		    #this is quadrant 0
-		    quadrantToMoveTo = 0
+			#this is quadrant 0
+			quadrantToMoveTo = 0
 		elif angleInRadians >= math.pi / 2.0 and angleInRadians <= math.pi :
-		    #this is quadrant 1
-		    quadrantToMoveTo = 1
+			#this is quadrant 1
+			quadrantToMoveTo = 1
 		elif angleInRadians <= 0.0 and angleInRadians >= -1.0 * math.pi / 2.0 :
-		    #this is quadrant 3
-		    quadrantToMoveTo = 3
+			#this is quadrant 3
+			quadrantToMoveTo = 3
 		elif angleInRadians <= -1.0 * math.pi / 2.0 and angleInRadians >= -1.0 * math.pi:
-		    #this is quadrant 2
-		    quadrantToMoveTo = 2
+			#this is quadrant 2
+			quadrantToMoveTo = 2
 		return quadrantToMoveTo
 		
 
@@ -490,17 +491,17 @@ class keepAway():
 		
 		#trivial case where the game is over and you return nothing
 		if self.isGameOver():
-		    return None
+			return None
 		
 		#initialize the return set
 		returnSet = set()
 		for i in range(len(directions)):
-		    returnSet.add(i)
+			returnSet.add(i)
 
 		for i in range(len(directions)):
-		    if not self.__isDirectionLegal(inputAgent, directions[i]):
-		        # this will execute if a move is ILLEGAL
-		        returnSet.difference_update(bannedQuadrants[i])
+			if not self.__isDirectionLegal(inputAgent, directions[i]):
+				# this will execute if a move is ILLEGAL
+				returnSet.difference_update(bannedQuadrants[i])
 		return returnSet
 
 	#a function that is internal to __getLegalQuadrants
@@ -527,13 +528,13 @@ class keepAway():
 		
 		#note, y axis is reversed in pygame: decrease Y axis to move UP, and vice versa
 		if direction == "up":
-		    rowPixel1 -= self.maxPlayerSpeed
+			rowPixel1 -= self.maxPlayerSpeed
 		elif direction == "down":
-		    rowPixel1 += self.maxPlayerSpeed
+			rowPixel1 += self.maxPlayerSpeed
 		elif direction == "right":
-		    colPixel1 += self.maxPlayerSpeed
+			colPixel1 += self.maxPlayerSpeed
 		elif direction == "left":
-		    colPixel1 -= self.maxPlayerSpeed
+			colPixel1 -= self.maxPlayerSpeed
 		
 		#lower right coordinate of robot boundary
 		rowPixel2 = rowPixel1 + self.__agent_block_size
@@ -541,11 +542,11 @@ class keepAway():
 		
 		#check to see if you go outside the boundaries of the game    
 		if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.__display_height or colPixel2 > self.__display_width :
-		    #print "upper left coordinates: ", (rowPixel1, colPixel1) 
-		    return False
+			#print "upper left coordinates: ", (rowPixel1, colPixel1) 
+			return False
 		#if you're not outside boundaries, then it's a totally legal direction. It just might not be optimal
 		else:
-		    return True
+			return True
 		
 		
 	"""
@@ -584,16 +585,16 @@ class keepAway():
 		self.takerTruePosArray[1] = (self.__display_height - 37.5,  50)
 		
 		for i in range(len(self.keeperArray)):
-		    self.keeperArray[i].updateAgentPosition(kUtil.getNoisyVals(self.keeperTruePosArray[i], self.agentSigmaError)) 
-		    self.keeperArray[i].noisyBallPos = kUtil.getNoisyVals(self.fieldBall.trueBallPos,self.keeperArray[i].getSigma())
-		    self.keeperArray[i].inPosession = False
-		    self.keeperArray[i].isKicking = False
-		    
+			self.keeperArray[i].updateAgentPosition(kUtil.getNoisyVals(self.keeperTruePosArray[i], self.agentSigmaError)) 
+			self.keeperArray[i].noisyBallPos = kUtil.getNoisyVals(self.fieldBall.trueBallPos,self.keeperArray[i].getSigma())
+			self.keeperArray[i].inPosession = False
+			self.keeperArray[i].isKicking = False
+
 		for i in range(len(self.takerArray)):
-		    self.takerArray[i].updateAgentPosition(kUtil.getNoisyVals(self.takerTruePosArray[i], self.agentSigmaError)) 
-		    self.takerArray[i].noisyBallPos = kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.takerArray[i].getSigma())
-		    self.takerArray[i].inPosession = False
-		    self.takerArray[i].isKicking = False
+			self.takerArray[i].updateAgentPosition(kUtil.getNoisyVals(self.takerTruePosArray[i], self.agentSigmaError)) 
+			self.takerArray[i].noisyBallPos = kUtil.getNoisyVals(self.fieldBall.trueBallPos, self.takerArray[i].getSigma())
+			self.takerArray[i].inPosession = False
+			self.takerArray[i].isKicking = False
 	#detect if game is over by checking if ball is out of bounds, or 
 	#if a taker has gained posession of the ball
 	def isGameOver(self):
@@ -607,8 +608,8 @@ class keepAway():
 		#game is over when a taker obtains the ball
 		#game is also over when the ball is kicked out of bounds
 		for i in range(len(self.takerArray)):
-		    if self.takerArray[i].inPosession == True:
-		        return True
+			if self.takerArray[i].inPosession == True:
+				return True
 		#now check if ball is out of bounds:
 		rowPixel1 = self.fieldBall.trueBallPos[0]
 		colPixel1 = self.fieldBall.trueBallPos[1]
@@ -619,7 +620,7 @@ class keepAway():
 		
 		#check to see if you go outside the boundaries of the game    
 		if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.__display_height - 1 or colPixel2 > self.__display_width - 1:  
-		    return True
+			return True
 		#If you made it here, then that means the game is still going
 		return False
 
@@ -641,21 +642,21 @@ class keepAway():
 		"""
 		#replace the standard agents with the intelligent or hand coded agents
 		for i in range(len(self.keeperArray)):
-		    tempKeeper = self.keeperArray[i]
-		    self.keeperArray[i] = inputClass(tempKeeper.worldRef, tempKeeper.getSimIndex(), tempKeeper.get_noisy_pos(), tempKeeper.getSigma(), tempKeeper.getAgentType(), self.fieldBall.trueBallPos, self.maxPlayerSpeed, self.maxBallSpeed) 
+			tempKeeper = self.keeperArray[i]
+			self.keeperArray[i] = inputClass(tempKeeper.worldRef, tempKeeper.getSimIndex(), tempKeeper.get_noisy_pos(), tempKeeper.getSigma(), tempKeeper.getAgentType(), self.fieldBall.trueBallPos, self.maxPlayerSpeed, self.maxBallSpeed) 
 		for i in range(len(self.takerArray)):
-		    tempTaker = self.takerArray[i]
-		    self.takerArray[i] = inputClass(tempTaker.worldRef, tempTaker.getSimIndex(), tempTaker.get_noisy_pos(), tempTaker.getSigma(), tempTaker.getAgentType(), self.fieldBall.trueBallPos, self.maxPlayerSpeed, self.maxBallSpeed)    
+			tempTaker = self.takerArray[i]
+			self.takerArray[i] = inputClass(tempTaker.worldRef, tempTaker.getSimIndex(), tempTaker.get_noisy_pos(), tempTaker.getSigma(), tempTaker.getAgentType(), self.fieldBall.trueBallPos, self.maxPlayerSpeed, self.maxBallSpeed)    
 		
 		#once the other arrays are initialized, send references to all keepers and takers
 		#you don't need to worry about other references. This function will only be called during initialization
 		#also go and send over references to the ball                 
 		for i in range(len(self.keeperArray)):
-		    self.keeperArray[i].receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
-		    self.keeperArray[i].receiveBallReference(self.fieldBall)
+			self.keeperArray[i].receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
+			self.keeperArray[i].receiveBallReference(self.fieldBall)
 		for i in range(len(self.takerArray)):
-		    self.takerArray[i].receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
-		    self.takerArray[i].receiveBallReference(self.fieldBall)
+			self.takerArray[i].receiveListOfOtherPlayers(self.keeperArray, self.takerArray, i)
+			self.takerArray[i].receiveBallReference(self.fieldBall)
 
 	"""END OF GAME OVER, RESET, AND AGENT REPLACEMENT CODE"""
 
@@ -672,39 +673,40 @@ class keepAway():
 		"""     
 		#check takers first. If they get the ball, GG, so return
 		for i in range(len(self.takerArray)):
-		    if self.__agentBallIntersection(self.takerArray[i], "taker"):
-		        self.takerArray[i].inPosession = True
-		        self.fieldBall.updatePosession(True)
-		        #print "taker ", i, "has ball at taker true coordinate:", self.takerArray[i].true_pos
-		        #print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
-		        return
-		    else:
-		        self.takerArray[i].inPosession = False
+			if self.__agentBallIntersection(self.takerArray[i], "taker"):
+				self.takerArray[i].inPosession = True
+				self.fieldBall.updatePosession(True)
+				#print "taker ", i, "has ball at taker true coordinate:", self.takerArray[i].true_pos
+				#print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
+				return
+			else:
+				self.takerArray[i].inPosession = False
 
 		
 		for i in range(len(self.keeperArray)):
 		#for i in range(1):
-		    if self.keeperArray[i].isKicking == False:
-		        if self.__agentBallIntersection(self.keeperArray[i], "keeper"):
-		            #case where keeper is NOT kicking, and ball and agent intersect
-		            self.keeperArray[i].inPosession = True
-		            self.fieldBall.updatePosession(True)
-		            return
-		        #print "keeper ", i, "has ball at keeper true coordinate:", self.keeperArray[i].true_pos, " to ", (self.keeperArray[i].true_pos[0] + self.agent_block_size, self.keeperArray[i].true_pos[1] + self.agent_block_size)
-		        #print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
-		    else:
-		        #this is the case where the agent IS kicking
-		        #check to see if the agent is intersecting the ball
-		        #if they are, leave keeper.isKicking = true
-		        #otherwise, you can now update it to False
-		        if self.__agentBallIntersection(self.keeperArray[i], "keeper") == False:
-		            self.keeperArray[i].isKicking = False
-		        self.keeperArray[i].inPosession = False
-		    
+			if self.keeperArray[i].isKicking == False:
+				if self.__agentBallIntersection(self.keeperArray[i], "keeper"):
+					#case where keeper is NOT kicking, and ball and agent intersect
+					self.keeperArray[i].inPosession = True
+					self.fieldBall.updatePosession(True)
+					return
+				#print "keeper ", i, "has ball at keeper true coordinate:", self.keeperArray[i].true_pos, " to ", (self.keeperArray[i].true_pos[0] + self.agent_block_size, self.keeperArray[i].true_pos[1] + self.agent_block_size)
+				#print "ball true corner coord range: ", self.fieldBall.trueBallPos, "to", (self.fieldBall.trueBallPos[0]+ self.ball_block_size, self.fieldBall.trueBallPos[1]+ self.ball_block_size)
+			else:
+				#this is the case where the agent IS kicking
+				#check to see if the agent is intersecting the ball
+				#if they are, leave keeper.isKicking = true
+				#otherwise, you can now update it to False
+				if self.__agentBallIntersection(self.keeperArray[i], "keeper") == False:
+					self.keeperArray[i].isKicking = False
+				self.keeperArray[i].inPosession = False
+
 		#if you reached here, then it means that no one has the ball, so update accordingly
 		#self.fieldBall.updatePosession(False, self.fieldBall.trueBallPos)
 		self.fieldBall.updatePosession(False)
-		        
+
+
 	#this is more or less a private function of self.__updateBallPosession()
 	#check for the intersection of an agent and a ball
 	def __agentBallIntersection(self, inputAgent, agentType):
@@ -725,11 +727,11 @@ class keepAway():
 		"""  
 		#print
 		if agentType == "keeper":
-		    agentTruePosition = self.keeperTruePosArray[inputAgent.getSimIndex()]
+			agentTruePosition = self.keeperTruePosArray[inputAgent.getSimIndex()]
 		else:
-		    #agent must be a taker
-		    agentTruePosition = self.takerTruePosArray[inputAgent.getSimIndex()]
-		    
+			#agent must be a taker
+			agentTruePosition = self.takerTruePosArray[inputAgent.getSimIndex()]
+
 		agentRadius = self.__agent_block_size / 2
 		ballRadius = self.__ball_block_size / 2
 		cutoff = agentRadius+ ballRadius
@@ -740,12 +742,12 @@ class keepAway():
 		distBetweenMidPoints = kUtil.getDist(agentMidPoint, ballMidPoint)
 		#print "Cutoff: ", cutoff, " actual Distance: ", distBetweenMidPoints
 		if (distBetweenMidPoints <= cutoff):
-		    return True
+			return True
 		else:
-		    return False
+			return False
 	"""END OF AGENT POSSESSION UPDATE AND BALL/AGENT COLLISION DETECTION"""
-		    
-		    
+
+
 	"""THIS CODE IS FOR PRE-CALCULATING RECEIVE(), STATE VARIABLES, AND SENDING THEM"""
 
 	#send all the state variables to the keepers and takers
@@ -762,13 +764,13 @@ class keepAway():
 		self.simpleStateVars = getSimpleStateVars.getStateVarsKeepers(self.keeperArray, self.takerArray, self.__field_center)
 		#send the state variables to each keeper and taker
 		for i in range(len(self.keeperArray)):
-		    noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
-		    noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
-		    self.keeperArray[i].receiveSimpleStateVariables(noisyCurrVars)
+			noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
+			noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
+			self.keeperArray[i].receiveSimpleStateVariables(noisyCurrVars)
 		for i in range(len(self.takerArray)):
-		    noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
-		    noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
-		    self.takerArray[i].receiveSimpleStateVariables(noisyCurrVars)
+			noisyCurrVars = kUtil.getNoisyVals(self.simpleStateVars, self.agentSigmaError)
+			noisyCurrVars = self.__boundSimpleVars(noisyCurrVars)
+			self.takerArray[i].receiveSimpleStateVariables(noisyCurrVars)
 
 	def __boundSimpleVars(self, noisySimpleStateVars):
 		"""
@@ -791,11 +793,11 @@ class keepAway():
 		varIndex11 = noisySimpleStateVars[11]
 		varIndex12 = noisySimpleStateVars[12]
 		while (varIndex11 > 1.0 or varIndex11 <  -1.0):
-		    varIndex11 = kUtil.getNoisyVals(noisySimpleStateVars[11], self.agentSigmaError)
+			varIndex11 = kUtil.getNoisyVals(noisySimpleStateVars[11], self.agentSigmaError)
 		while (varIndex12 > 1.0 or varIndex12 <  -1.0):
-		    varIndex12 = kUtil.getNoisyVals(noisySimpleStateVars[12], self.agentSigmaError)
+			varIndex12 = kUtil.getNoisyVals(noisySimpleStateVars[12], self.agentSigmaError)
 		if varIndex11 > 1.0 or varIndex11 < -1.0 or varIndex12 > 1.0 or varIndex12 < -1.0:
-		    print("Values still out of range: varIndex11 = ", varIndex11, ", varIndex12 = ", varIndex12)
+			print("Values still out of range: varIndex11 = ", varIndex11, ", varIndex12 = ", varIndex12)
 		return noisySimpleStateVars[:11] + (varIndex11, varIndex12)
 
 	def _sendBirdsEyeView(self):
@@ -803,8 +805,8 @@ class keepAway():
 		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-		    self.keeperArray[i].receiveBirdsEyeView(self.bev_grid)
-		    
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid)
+
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
 		return True
@@ -814,7 +816,6 @@ class keepAway():
 		return True
 
 
-		    
 	def _sendCalcReceiveDecision(self):
 		"""
 		This public function will send all keepers the receive decision. For more information
@@ -827,11 +828,11 @@ class keepAway():
 		#print("rDecision decided upon:")
 		#print(rDecision)
 		for i in range(len(self.keeperArray)):
-		    rNoisyDecision= (rDecision[0], kUtil.getNoisyVals(rDecision[1], self.agentSigmaError))
-		    self.keeperArray[i].receiveDecision(rNoisyDecision)
+			rNoisyDecision= (rDecision[0], kUtil.getNoisyVals(rDecision[1], self.agentSigmaError))
+			self.keeperArray[i].receiveDecision(rNoisyDecision)
 		for i in range(len(self.takerArray)):
-		    rNoisyDecision= (rDecision[0], kUtil.getNoisyVals(rDecision[1], self.agentSigmaError))
-		    self.takerArray[i].receiveDecision(rNoisyDecision)
+			rNoisyDecision= (rDecision[0], kUtil.getNoisyVals(rDecision[1], self.agentSigmaError))
+			self.takerArray[i].receiveDecision(rNoisyDecision)
 
 	"""END OF CODE FOR CALCULATING RECEIVE() AND SENDING TO AGENTS"""
 
@@ -869,52 +870,50 @@ class keepAway():
 		intro = True
 		#display intro title to user
 		if intro:
-		    self.gameDisplay.fill(self.__white)
-		    self.__message_to_screen("Welcome to Keep Away",
-		                      self.__green,
-		                      -100,
-		                      "medium")      
-		    self.__message_to_screen("N for NEAT, ",
-		                      self.__black,
-		                      40)   
-		    self.__message_to_screen("S for HyperNEAT, ",
-		                      self.__black,
-		                      80)           
-		    self.__message_to_screen("H for hand coded agent, or E to exit.",
-		                      self.__black,
-		                      120) 
-		                      
-		    pygame.display.update()
+			self.gameDisplay.fill(self.__white)
+			self.__message_to_screen("Welcome to Keep Away",
+			                  self.__green,
+			                  -100,
+			                  "medium")      
+			self.__message_to_screen("N for NEAT, ",
+			                  self.__black,
+			                  40)   
+			self.__message_to_screen("S for HyperNEAT, ",
+			                  self.__black,
+			                  80)           
+			self.__message_to_screen("H for hand coded agent, or E to exit.",
+			                  self.__black,
+			                  120) 
+			pygame.display.update()
 		#while in the intro, check for user input on what type of model they wanna use
 		while intro:
-		    for event in pygame.event.get():
-		        if event.type == pygame.QUIT:
-		            self.__exitSim()
-		        if event.type == pygame.KEYDOWN:
-		            if event.key == pygame.K_s:
-		                mode = "hyperNEAT"
-		                self.__replaceAgents(hyperNEAT.hyperNEAT)
-		                intro = False
-		                return mode
-		        if event.type == pygame.KEYDOWN:
-		            if event.key == pygame.K_n:
-		                mode = "NEAT"
-		                self.__replaceAgents(NEAT.NEAT)
-		                intro = False
-		                return mode
-		            if event.key == pygame.K_h:
-		                mode = "hand_coded"
-		                self.__replaceAgents(handCoded.handCoded)
-		                intro = False
-		                return mode
-		            if event.key == pygame.K_m:
-		                mode = "manual"
-		                intro = False
-		                return mode
-		            if event.key == pygame.K_e:
-		                self.__exitSim()
-		                
-		    self.clock.tick(5)
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					self.__exitSim()
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_s:
+						mode = "hyperNEAT"
+						self.__replaceAgents(hyperNEAT.hyperNEAT)
+						intro = False
+						return mode
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_n:
+						mode = "NEAT"
+						self.__replaceAgents(NEAT.NEAT)
+						intro = False
+						return mode
+					if event.key == pygame.K_h:
+						mode = "hand_coded"
+						self.__replaceAgents(handCoded.handCoded)
+						intro = False
+						return mode
+					if event.key == pygame.K_m:
+						mode = "manual"
+						intro = False
+						return mode
+					if event.key == pygame.K_e:
+						self.__exitSim()
+			self.clock.tick(5)
 
 	def gameLoop(self, mode, turnOnGrid = False):
 		"""
@@ -936,28 +935,28 @@ class keepAway():
 					gameExit = True
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_SPACE:
-					    self.pause("PAUSED. Press Space to continue")
+						self.pause("PAUSED. Press Space to continue")
 			if(mode == "manual"):
 				for event in pygame.event.get():
 					if event.type == pygame.QUIT:
-					    gameExit = True
+						gameExit = True
 					if event.type == pygame.KEYDOWN:
-					    if event.key == pygame.K_LEFT:
-					        self.moveAttempt(experimentAgent, ((0,-1), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_RIGHT:
-					        self.moveAttempt(experimentAgent, ((0,1), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_UP:
-					        self.moveAttempt(experimentAgent, ((-1,0), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_DOWN:
-					        self.moveAttempt(experimentAgent, ((1,0), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_1:
-					        self.moveAttempt(experimentAgent, ((-1,-1), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_2:
-					        self.moveAttempt(experimentAgent, ((-1,1), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_3:
-					        self.moveAttempt(experimentAgent, ((1,-1), self.maxPlayerSpeed))
-					    elif event.key == pygame.K_4:
-					        self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
+						if event.key == pygame.K_LEFT:
+							self.moveAttempt(experimentAgent, ((0,-1), self.maxPlayerSpeed))
+						elif event.key == pygame.K_RIGHT:
+							self.moveAttempt(experimentAgent, ((0,1), self.maxPlayerSpeed))
+						elif event.key == pygame.K_UP:
+							self.moveAttempt(experimentAgent, ((-1,0), self.maxPlayerSpeed))
+						elif event.key == pygame.K_DOWN:
+							self.moveAttempt(experimentAgent, ((1,0), self.maxPlayerSpeed))
+						elif event.key == pygame.K_1:
+							self.moveAttempt(experimentAgent, ((-1,-1), self.maxPlayerSpeed))
+						elif event.key == pygame.K_2:
+							self.moveAttempt(experimentAgent, ((-1,1), self.maxPlayerSpeed))
+						elif event.key == pygame.K_3:
+							self.moveAttempt(experimentAgent, ((1,-1), self.maxPlayerSpeed))
+						elif event.key == pygame.K_4:
+							self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
 			elif (mode == "hand_coded"):
 				self._sendCalcReceiveDecision()
 				self._sendSimpleStateVars()

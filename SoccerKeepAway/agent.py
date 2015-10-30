@@ -157,7 +157,7 @@ class agent():
             for tiles that are in the path from keeper 0 to the other keepers. Tiles that have a keeper on 
             it have a value of 1, and tiles that have a taker on it have a value of -1.
         
-        :type grid: 2D arra of floats
+        :type grid: 2D array of floats
         
         :returns: no return
         """
@@ -544,49 +544,49 @@ class agent():
         return
             
     def decisionFlowChart (self, message = None):
-		"""
-		This function will control the movement of keepers and takers. It controls 
-		movement by calling on all the private movement functions that are in defined
-		in this agent class
-		"""
-		if (self.getAgentType() == "taker"):
-			takerActual = sorted(self.takerArray)
-			if (self.agentListIndex == takerActual[0].agentListIndex):
-				#you're the closer taker so go for the ball
-				self.__goToBall()
-			else:
-				#you're the farther taker, so go and block pass to the closer keeper
-				"""
-				#this is the code where the 2nd taker is stupid. 
-				keeperActual = sorted(self.keeperArray)
-				cos2 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
-				cos3 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
-				if cos2 > cos3:
-				    #block keeper 2
-				    self.__blockPass(1)
-				else:
-				    self.__blockPass(2)
-				"""
-				#this is the code where the 2nd keeper is smarter and acts as if he understands positioning better
-				                #this is the code where the 2nd taker is stupid. 
-				keeperActual = sorted(self.keeperArray)
-				cos2 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
-				cos3 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
-				if cos2 > cos3:
-				    #if cos2 is bigger, then the taker going for the ball is also kinda blocking a pass to keeper 1. At least
-				    #he's doing a better job blocking K1 than K2, so go block K2
-				    self.__blockPass(2)
-				else:
-				    #otherwise, go block K1
-				    self.__blockPass(1)
+        """
+        This function will control the movement of keepers and takers. It controls 
+        movement by calling on all the private movement functions that are in defined
+        in this agent class
+        """
+        if (self.getAgentType() == "taker"):
+            takerActual = sorted(self.takerArray)
+            if (self.agentListIndex == takerActual[0].agentListIndex):
+                #you're the closer taker so go for the ball
+                self.__goToBall()
+            else:
+                #you're the farther taker, so go and block pass to the closer keeper
+                """
+                #this is the code where the 2nd taker is stupid. 
+                keeperActual = sorted(self.keeperArray)
+                cos2 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
+                cos3 = kUtil.cosTheta(self.get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
+                if cos2 > cos3:
+                    #block keeper 2
+                    self.__blockPass(1)
+                else:
+                    self.__blockPass(2)
+                """
+                #this is the code where the 2nd keeper is smarter and acts as if he understands positioning better
+                                #this is the code where the 2nd taker is stupid. 
+                keeperActual = sorted(self.keeperArray)
+                cos2 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[1].get_noisy_pos())
+                cos3 = kUtil.cosTheta(takerActual[0].get_noisy_pos(), keeperActual[0].get_noisy_pos(), keeperActual[2].get_noisy_pos())
+                if cos2 > cos3:
+                    #if cos2 is bigger, then the taker going for the ball is also kinda blocking a pass to keeper 1. At least
+                    #he's doing a better job blocking K1 than K2, so go block K2
+                    self.__blockPass(2)
+                else:
+                    #otherwise, go block K1
+                    self.__blockPass(1)
 
-		else:
-			#the agent is a keeper
-			if(self.inPosession == False):
-				#deterministic stuff happens here
-				self.__receive()
-			else:
-				self._decisionFunction()
+        else:
+            #the agent is a keeper
+            if(self.inPosession == False):
+                #deterministic stuff happens here
+                self.__receive()
+            else:
+                self._decisionFunction()
         
     #this function is for saving the training data
     #if you have multiple agents, make the inputAgent string
