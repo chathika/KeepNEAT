@@ -23,7 +23,7 @@ class keepAway():
 		self.__red = (255,0,0)
 		self.__green = (0,155,0)
 		self.__blue = (0,0,255)
-		    
+		
 		#give the game a title
 		pygame.display.set_caption('Keepaway')
 		self.keeperScore = 0
@@ -70,8 +70,6 @@ class keepAway():
 		#start the ball kinda close to the keeper in the upper left corner
 		self.fieldBall = ball.ball( (self.__field_center[0]/4, self.__field_center[1]/4), self.maxBallSpeed)
 		
-		#birdsEyeView generator for agents like hyperNEAT:
-		self.bev = birdsEyeView.birdsEyeView()
 		#the simple state variables for agents like NEAT, novelty search, and maybe sarsa
 		self.simpleStateVars = None
 		
@@ -102,6 +100,10 @@ class keepAway():
 		self.medfont = pygame.font.SysFont("comicsansms",50) 
 		self.largefont = pygame.font.SysFont("comicsansms",80) 
 		self.verysmallfont = pygame.font.SysFont("comicsansms", 12)
+		
+		#birdsEyeView generator for agents like hyperNEAT:
+		self.bev = birdsEyeView.birdsEyeView(self.__agent_block_size, self.__ball_block_size)
+		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 
 	"""
 	BASIC REQUIRED FUNCTIONS 
@@ -612,8 +614,8 @@ class keepAway():
 		colPixel1 = self.fieldBall.trueBallPos[1]
 		
 		#lower right coordinate of ball boundary
-		rowPixel2 = rowPixel1 + self.ball_block_size
-		colPixel2 = colPixel1 + self.ball_block_size    
+		rowPixel2 = rowPixel1 + self.__ball_block_size
+		colPixel2 = colPixel1 + self.__ball_block_size    
 		
 		#check to see if you go outside the boundaries of the game    
 		if rowPixel1 < 0 or colPixel1 < 0 or rowPixel2 > self.__display_height - 1 or colPixel2 > self.__display_width - 1:  
@@ -729,10 +731,10 @@ class keepAway():
 		    agentTruePosition = self.takerTruePosArray[inputAgent.getSimIndex()]
 		    
 		agentRadius = self.__agent_block_size / 2
-		ballRadius = self.ball_block_size / 2
+		ballRadius = self.__ball_block_size / 2
 		cutoff = agentRadius+ ballRadius
 		agentMidPoint = kUtil.addVectorToPoint(agentTruePosition, (self.__agent_block_size/2, self.__agent_block_size/2))
-		ballMidPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, (self.ball_block_size/2, self.ball_block_size/2))
+		ballMidPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, (self.__ball_block_size/2, self.__ball_block_size/2))
 		#print "agent actual:", inputAgent.true_pos, "agentMid:", agentMidPoint
 		#print "agentMid:", agentMidPoint, " ballMid:", ballMidPoint
 		distBetweenMidPoints = kUtil.getDist(agentMidPoint, ballMidPoint)
@@ -798,10 +800,10 @@ class keepAway():
 
 	def _sendBirdsEyeView(self):
 		#get the state variables
-		grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-		    self.keeperArray[i].receiveBirdsEyeView(grid)
+		    self.keeperArray[i].receiveBirdsEyeView(self.bev_grid)
 		    
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
@@ -849,7 +851,7 @@ class keepAway():
 		#remove this line if you don't want the grid to be drawn
 		if showDisplay:
 			if (turnOnGrid):
-				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height, self.__agent_block_size)
+				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
 				self.__drawWorld (grid)
 			else:
 				self.__drawWorld()
@@ -995,6 +997,16 @@ class keepAway():
 	"""END OF INTRO AND GAME LOOPS"""
 		
 	"""Getter functions"""
+	def get_ball_block_size(self):
+		"""
+		this simply gets and returns the simulators agent_block_size, which 
+		is the width and height of the agent in pixels. 
+		
+		:returns: agent block size
+		:rtype: integer
+		"""
+		return self.__ball_block_size	
+	
 	def get_agent_block_size(self):
 		"""
 		this simply gets and returns the simulators agent_block_size, which 

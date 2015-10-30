@@ -332,6 +332,7 @@ class agent():
         self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTeammateVector, self.__sigma))
         #self.fieldBall.updatepos( kUtil.addVectorToPoint(self.fieldBall.true_pos, selfToTeammateVector ) )
         #return (selfToTeammateDirection, self.maxBallSpeed)
+        
     
     #UNIT TESTED 
     #use the solution to a quadratic formula to get the rotated unit vectors. So if you had a vector, and
