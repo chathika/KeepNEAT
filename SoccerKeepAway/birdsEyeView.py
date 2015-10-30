@@ -140,6 +140,27 @@ class birdsEyeView():
         #print("new tile: ", ( math.floor(coord[0]/blocksize), math.floor(coord[1]/blocksize) ))
         return ( math.floor(coord[0]/self.__block_size), math.floor(coord[1]/self.__block_size) )
     
+    def getBirdsEyeViewAsList(self, keeperArray, takerArray, display_width, display_height):
+        grid = self.getBirdsEyeView(keeperArray, takerArray, display_width, display_height)
+        returnlist = []
+        for l in grid:
+            returnlist = returnlist + l
+        return returnlist
+    
+    def getSubstrate(self, keeperArray, takerArray, display_width, display_height):
+        grid = self.getBirdsEyeView(keeperArray, takerArray, display_width, display_height)
+        for i in range(len(grid)):
+            #i iterates over rows
+            for j in range(len(grid[i])):
+                #j iterates over columns
+                grid[i][j] = (i * self.getAgentBlockSize() + (self.getAgentBlockSize()/2),
+                              j* self.getAgentBlockSize() + (self.getAgentBlockSize()/2))
+        returnList = []
+        for l in grid:
+            returnList = returnList + l
+        return returnList
+        
+    
     def getBirdsEyeView(self, keeperArray, takerArray, display_width, display_height):
         """
         This function will take in the array of keepers, takers, the display width of the simulator, 
@@ -221,6 +242,20 @@ class birdsEyeView():
 
 #note: only tested octant 1. too tedious to test all 8
 class testingCode(unittest.TestCase):
+    
+    def testGetGridAsList(self):
+        import keepAway
+        world = keepAway.keepAway(0)
+        e = birdsEyeView()
+        grid = e.getBirdsEyeView(world.keeperArray, world.takerArray, world.get_display_width(), world.get_display_height())
+        listGrid = e.getBirdsEyeViewAsList(world.keeperArray, world.takerArray, world.get_display_width(), world.get_display_height())
+        for i in range(len(grid)):
+            for j in range(len(grid[i])):
+                self.assertEqual(grid[i][j], listGrid[i * len(grid[i]) + j])
+                
+        
+        
+    
     #test to see if you are detecting octants correctly
     def testOctTest(self):
         #oct 0
