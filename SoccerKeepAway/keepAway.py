@@ -969,6 +969,7 @@ class keepAway():
 							self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
 			elif (mode == "hand_coded"):
 				self._sendCalcReceiveDecision()
+				self._sendBirdsEyeView()
 				self._sendSimpleStateVars()
 				for keeper in self.keeperArray:
 					keeper.decisionFlowChart()
