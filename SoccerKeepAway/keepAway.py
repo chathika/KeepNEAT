@@ -49,7 +49,7 @@ class keepAway():
 		#block sizes are used for collision detection
 		#only 1 size per element because all blocks are squares. block size = side length
 		self.__agent_block_size = 23
-		self.ball_block_size = 12
+		self.__ball_block_size = 12
 
 		self.maxBallSpeed= 4
 		self.maxPlayerSpeed = 2

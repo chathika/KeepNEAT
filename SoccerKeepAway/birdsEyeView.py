@@ -169,16 +169,16 @@ class birdsEyeView():
         takerPositions = []
         keeperPositions = []
         sortedKeepers = sorted(keeperArray)
-        keeperPositions.append(self.__convertToTile(sortedKeepers[0].getNoisyMidPoint(), self.__block_size))
+        keeperPositions.append(self.__convertToTile(sortedKeepers[0].getNoisyMidPoint()))
         for i in range(1, len(keeperArray)):
-            keeperPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), self.__block_size), 
-                         self.__convertToTile( sortedKeepers[i].getNoisyMidPoint(), self.__block_size) ) ) )
-            keeperPositions.append(self.__convertToTile(sortedKeepers[i].getNoisyMidPoint(), self.__block_size))
+            keeperPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint()), 
+                         self.__convertToTile( sortedKeepers[i].getNoisyMidPoint()) ) ) )
+            keeperPositions.append(self.__convertToTile(sortedKeepers[i].getNoisyMidPoint()))
             
         for i in range(len(takerArray)):
-            takerPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint(), self.__block_size), 
-                         self.__convertToTile( takerArray[i].getNoisyMidPoint(), self.__block_size) ) ) )
-            takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint(), self.__block_size))
+            takerPaths.append(self.getPathTiles((self.__convertToTile( sortedKeepers[0].getNoisyMidPoint()), 
+                         self.__convertToTile( takerArray[i].getNoisyMidPoint()) ) ) )
+            takerPositions.append(self.__convertToTile(takerArray[i].getNoisyMidPoint()))
         returnGrid = [] #access values as row, col
         for i in range(int(math.ceil(display_height/self.__block_size))):
             returnGrid.append([]) 
