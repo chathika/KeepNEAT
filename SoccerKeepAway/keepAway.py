@@ -104,8 +104,9 @@ class keepAway():
 		
 		#birdsEyeView generator for agents like hyperNEAT:
 		self.bev = birdsEyeView.birdsEyeView(self.__agent_block_size, self.__ball_block_size)
-		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -233,7 +234,7 @@ class keepAway():
 			self.clock.tick(10)
 
 
-	def __drawWorld (self, grid = None):
+	def __drawWorld (self, grid = None, substrate = None):
 		"""
 		This function will go and update the screen to display the next frame of 
 		animation. This function should be called only after all the movement
@@ -248,8 +249,8 @@ class keepAway():
 		#note: for blit function, give it column, row instead of row, column
 		self.gameDisplay.blit(self.__worldImage, (0,0))
 		
-		if (grid != None):
-			self.__drawBirdsEyeView(grid)
+		if (grid != None and substrate != None):
+			self.__drawBirdsEyeView(grid, substrate)
 		
 		for i in range(len(self.keeperArray)):
 			self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
@@ -267,7 +268,7 @@ class keepAway():
 		if (self.keeperArray[0].onReceiveDecision != None):
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
 
-	def __drawBirdsEyeView(self, grid):
+	def __drawBirdsEyeView(self, grid, substrate):
 		for i in range(len(grid)):
 			for j in range(len(grid[i])):
 				if grid[i][j] == 0.0:
@@ -284,6 +285,12 @@ class keepAway():
 					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
 				if grid[i][j] == 0.6:
 					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
+		for z in range(len(substrate)):
+			i = substrate[z][0]
+			j = substrate[z][1]
+			self.gameDisplay.blit(self.__debugYellowDotImage, (j,i))
+			
+					
 
 
 	def __updateScore(self):
@@ -802,10 +809,12 @@ class keepAway():
 
 	def _sendBirdsEyeView(self):
 		#get the state variables
-		self.bev_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid)
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_subsrate)
 
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
@@ -853,7 +862,8 @@ class keepAway():
 		if showDisplay:
 			if (turnOnGrid):
 				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
-				self.__drawWorld (grid)
+				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
+				self.__drawWorld (grid, substrate)
 			else:
 				self.__drawWorld()
 			self.__displayScore()
@@ -959,6 +969,7 @@ class keepAway():
 							self.moveAttempt(experimentAgent, ((1,1), self.maxPlayerSpeed))
 			elif (mode == "hand_coded"):
 				self._sendCalcReceiveDecision()
+				self._sendBirdsEyeView()
 				self._sendSimpleStateVars()
 				for keeper in self.keeperArray:
 					keeper.decisionFlowChart()
