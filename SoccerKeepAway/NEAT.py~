@@ -3,7 +3,9 @@ This module contains the hyperNEAT agent class.
 """
 import agent
 import numpy as np
-import MultiNEAT as NEAT
+import os.path
+import MultiNEAT as MNEAT
+import matplotlib as plt
 
 class NEAT(agent.agent):
 	"""
@@ -17,7 +19,13 @@ class NEAT(agent.agent):
 
 	def __init__(self, worldRef, simIndex, noisyPos, sigma, agentType, noisyBallPos,maxPlayerSpeed, maxBallSpeed, posession = False):
 		agent.agent.__init__(self, worldRef, simIndex, noisyPos, sigma, agentType, noisyBallPos, maxPlayerSpeed, maxBallSpeed, posession)
-		self.NN = None
+		fileExists = os.path.isfile('NEAT_Population/genome.txt')
+		if fileExists:
+			g = MNEAT.Genome('NEAT_Population/genome.txt')
+			self.NN = MNEAT.NeuralNetwork()
+			g.BuildPhenotype(self.NN)
+		else:
+			self.NN = None
 		#self.bestNN = None
 
 
@@ -31,7 +39,7 @@ class NEAT(agent.agent):
 		#print("Entering decision function")
 		self.NN.Flush()
 		self.NN.Input(np.array(self.stateVariables+(1,))) # can input numpy arrays, too
-		                              # for some reason only np.float64 is supported
+														# for some reason only np.float64 is supported
 		for _ in range(2):
 			self.NN.Activate()
 		o = self.NN.Output()
@@ -54,6 +62,4 @@ class NEAT(agent.agent):
 
 	def receiveBest(self, NN):
 		self.NN = NN
-			            
 
-			    

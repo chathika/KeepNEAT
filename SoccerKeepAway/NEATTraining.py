@@ -17,6 +17,7 @@ from pymunk.pygame_util import draw, from_pygame
 
 import cPickle
 import os.path
+import matplotlib.pyplot as plt
 
 params = NEAT.Parameters()
 params.PopulationSize = 150
@@ -138,14 +139,19 @@ def evaluate(worldRef, genome, i, display = False):
 def train(worldRef):
 
 	print("Entering training")
+	best_fitness_per_generation = []
+	species_per_generation = []
+	nodes_per_generation = []
+	links_per_generation = []
 	i=1
-	fileExists = os.path.isfile('NEAT_Population/population.txt')
+	fileExists = False
+	#fileExists = os.path.isfile('NEAT_Population/population.txt')
 	#fileExists = os.path.isfile('NEAT_Population/genome.txt')
 	if fileExists:
 		print("There is a previous stored population, loading it")
 		#f = open('NEAT_Population/population.txt', 'r')
 		#print (f)
-		pop = NEAT.Population('NEAT_Population/population.txt')
+		#pop = NEAT.Population('NEAT_Population/population.txt')
 		#g = NEAT.Genome('NEAT_Population/genome.txt')
 		'''		
 		print("Printing loaded popuation")
@@ -159,7 +165,7 @@ def train(worldRef):
 		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(2):
+	for generation in range(100):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -184,6 +190,10 @@ def train(worldRef):
 			best_genome_ever = best_genome_this_run
 
 		evaluate(worldRef,best_genome_this_run,index,True)
+		best_fitness_per_generation.append(best)
+		species_per_generation.append(len(pop.Species))
+		nodes_per_generation.append(best_genome_this_run.NumNeurons())
+		links_per_generation.append(best_genome_this_run.NumLinks())
 
 		pop.Epoch()
 
@@ -211,11 +221,41 @@ def train(worldRef):
 		for i in s.Individuals:
 			print("Fitness: ",i.GetFitness())
 	'''
-	pop.Save('NEAT_Population/population.txt')
+	#pop.Save('NEAT_Population/population.txt')
 	
-	#best_genome_ever.Save('NEAT_Population/genome.txt')
+	best_genome_ever.Save('NEAT_Population/genome.txt')
 
 	worldRef.resetGameForTraining()
+	plt.plot(best_fitness_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Maximum Fitness per Genetation")
+	plt.title("Maximum Fitness per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(species_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Species per Genetation")
+	plt.title("Number of Species per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(nodes_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Nodes in Genome of Fittest Individual per Genetation")
+	plt.title("Number of Nodes in Genome of Fittest Individual per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(links_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Links in Genome of Fittest Individual per Genetation")
+	plt.title("Number of Links in Genome of Fittest Individual per Generation for NEAT Agent")
+	plt.show()
+
 	
 	return True
 

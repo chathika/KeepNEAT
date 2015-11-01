@@ -1,7 +1,9 @@
 """
 This module contains the hyperNEAT agent class. 
 """
-import agent
+import agent, kUtil
+import numpy as np
+import MultiNEAT as NEAT
 
 class hyperNEAT(agent.agent):
 	"""
@@ -19,6 +21,40 @@ class hyperNEAT(agent.agent):
 
 	def receiveNN(self, NN):
 		self.NN = NN
+		
+	#hyperNEAT has it's own passball function which will override the default
+	def _passBall(self, pointToPassTo):
+		"""
+		If a keeper currently has the ball, then it has the option to hold the ball,
+		or pass it. Call this function to pass the ball. pointToPassTo is the coordinate that
+		the keeper can pass to. these are pixel values 
+		
+		:param pointToPassTo: the tile that the agent is passing to. It is an XY coordinate defined to be the top left 
+			corner of the tile you're trying to pass to
+		
+		:type pointToPassTo: typle of int
+		
+		:returns: no return 
+		"""
+		if self.fieldBall == None:
+			print("ERROR: trying to hold ball without actually having  ball")
+			return
+		
+		#pass to team mate integerK. if integerK = 1, then it's the 2nd element in array
+		selfToTargetDirection = kUtil.unitVector(kUtil.getVector(self.__getBallCenter(self.noisyBallPos), pointToPassTo))
+		selfToTargetVector = (kUtil.scalarMultiply(self.fieldBall.maxBallSpeed, selfToTargetDirection))
+
+				
+		#at this point, you've determined the angle you wanna pass, and you pass.
+		#set ball's possesion to false, and update to new point. ball class handles direction vector
+		self.fieldBall.updatePosession(False)
+		self.inPosession = False
+		self.isKicking = True
+		#kUtil.addVectorToPoint(self.fieldBall.trueBallPos, selfToTeammateVector)
+		self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTargetVector, self.getSigma()))
+		
+	def __getBallCenter(self, ballTopLeft):
+		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size()/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size()/2))
 
 	def _decisionFunction(self):
 		"""
@@ -26,7 +62,7 @@ class hyperNEAT(agent.agent):
 		"""
 		#print("Entering decision function")
 		self.NN.Flush()
-		self.NN.Input(np.array(self.stateVariables+(1,))) # can input numpy arrays, too
+		self.NN.Input(np.array(self.bevList)) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
 		#for _ in range(2):
 		self.NN.Activate()
@@ -39,9 +75,9 @@ class hyperNEAT(agent.agent):
 		if i==0:
 			self._holdBall()
 		elif i==1:
-			self._passBall(1)
+			self._passBall( (self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2) )
 		else:
-			self._passBall(2)
+			self._passBall((self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2))
 
 		#print("The decision is: ",i)
 
@@ -50,5 +86,5 @@ class hyperNEAT(agent.agent):
 
 	def receiveBest(self, NN):
 		self.NN = NN
-				        
+
 

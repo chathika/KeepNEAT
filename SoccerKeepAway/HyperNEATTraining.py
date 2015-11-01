@@ -174,11 +174,9 @@ def train(worldRef):
 				print("Fitness: ",i.GetFitness())
 	else:
 	'''
-	substrate = NEAT.Substrate([(-1., -1., 0.0), (-.5, -1., 0.0), (0.0, -1., 0.0),
-                            (.5, -1., 0.0), (1.0, -1., 0.0), (0.0, -1.0, -1.0),
-    ],
+	substrate = NEAT.Substrate(worldRef.bev_substrate,
                            [],
-                           [(-1., 1., 0.0), (1.0,1.0,0.0)])
+                           worldRef.bev_substrate)
 
 	substrate.m_allow_input_hidden_links = False
 	substrate.m_allow_input_output_links = False
