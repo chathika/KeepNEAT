@@ -69,15 +69,15 @@ class hyperNEAT(agent.agent):
 		o = self.NN.Output()
 
 		#print(len(o))
-
+		for j in range(len(self.bevList)):
+			if self.bevList[j] == 1.0001:
+				break
 		out,i = max([(x,y) for y,x in enumerate(o)])
 
-		if i==0:
+		if i==j:
 			self._holdBall()
-		elif i==1:
-			self._passBall( (self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2) )
 		else:
-			self._passBall((self.worldRef.get_display_height() / 2 , self.worldRef.get_display_width() / 2))
+			self._passBall(self.bevSubstrate[i])
 
 		#print("The decision is: ",i)
 
