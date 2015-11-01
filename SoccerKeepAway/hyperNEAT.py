@@ -3,6 +3,7 @@ This module contains the hyperNEAT agent class.
 """
 import agent, kUtil
 import numpy as np
+import MultiNEAT as NEAT
 
 class hyperNEAT(agent.agent):
 	"""
@@ -61,7 +62,7 @@ class hyperNEAT(agent.agent):
 		"""
 		#print("Entering decision function")
 		self.NN.Flush()
-		self.NN.Input(np.array(self.stateVariables+(1,))) # can input numpy arrays, too
+		self.NN.Input(np.array(self.bevList)) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
 		#for _ in range(2):
 		self.NN.Activate()
