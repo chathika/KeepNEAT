@@ -164,9 +164,10 @@ def __calc_receive_ball_moving(worldRef, inputDirection, possessingKeeperIndex):
         rDecision = [argmin, __calcOptimal(worldRef, worldRef.keeperArray, argmin, bestPerpIntersect)]
         return rDecision
     else:
-        #print("no argmin found. game about to crash for sure")
-        return None
-            
+		rDecision = [1 , worldRef.get_field_center()]
+		#print("no argmin found. game about to end for sure.")
+		return rDecision
+    
 #once an agent is determined to be the one in best position to get to the ball, then 
 #the next step is to try intercepting it. Calc optimal will check to see if the 
 #perpendicular intercept is out of play region. If so, it will iteratively change
@@ -229,10 +230,10 @@ def __calcOptimal(worldRef, agentList, i, intersect):
         optimalPoint = kUtil.addVectorToPoint(optimalPoint, stepVector)
         stepCount += 1
         if __isPointOutOfPlayRegion(worldRef, optimalPoint, agentList, i) == False:
-            print("Optimal found, returning optimal point:", optimalPoint) 
+            #print("Optimal found, returning optimal point:", optimalPoint) 
             return optimalPoint
     #if you get here, then no closer optimal was found
-    print("no optimal found, returning intersect", intersect) 
+    #print("no optimal found, returning intersect", intersect) 
     return intersect
     
 #simple function to check if a point is outside of the playable region defined by the player

@@ -241,6 +241,7 @@ class birdsEyeView():
             #convert all the points back to the right octant
             points[i] = converters[1](points[i])
         return points
+
         
 
 #note: only tested octant 1. too tedious to test all 8

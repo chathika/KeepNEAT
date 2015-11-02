@@ -18,6 +18,8 @@ from pymunk.pygame_util import draw, from_pygame
 import cPickle
 import os.path
 
+import matplotlib.pyplot as plt
+
 params = NEAT.Parameters()
 params.PopulationSize = 150
 params.DynamicCompatibility = True
@@ -67,14 +69,14 @@ params.MaxActivationA = 6.0;
 params.MutateNeuronActivationTypeProb = 0.03;
 
 params.ActivationFunction_SignedSigmoid_Prob = 0.0;
-params.ActivationFunction_UnsignedSigmoid_Prob = 0.0;
+params.ActivationFunction_UnsignedSigmoid_Prob = 1.0;
 params.ActivationFunction_Tanh_Prob = 1.0;
 params.ActivationFunction_TanhCubic_Prob = 0.0;
 params.ActivationFunction_SignedStep_Prob = 1.0;
 params.ActivationFunction_UnsignedStep_Prob = 0.0;
 params.ActivationFunction_SignedGauss_Prob = 1.0;
 params.ActivationFunction_UnsignedGauss_Prob = 0.0;
-params.ActivationFunction_Abs_Prob = 0.0;
+params.ActivationFunction_Abs_Prob = 1.0;
 params.ActivationFunction_SignedSine_Prob = 1.0;
 params.ActivationFunction_UnsignedSine_Prob = 0.0;
 params.ActivationFunction_Linear_Prob = 1.0;
@@ -132,7 +134,7 @@ def evaluate(worldRef, genome, substrate, i, display = False):
 			# draw the phenotype
 			img = np.zeros((450, 450, 3), dtype=np.uint8)
 			img += 10
-			NEAT.DrawPhenotype(img, (0, 0, 450, 450), net )
+			NEAT.DrawPhenotype(img, (0, 0, 450, 450), net ,15, 3, substrate)
 			cv2.imshow("current best", img)
 			cv2.waitKey(1)
 
@@ -161,6 +163,11 @@ def evaluate(worldRef, genome, substrate, i, display = False):
 def train(worldRef):
 
 	print("Entering training")
+	best_fitness_per_generation = []
+	species_per_generation = []
+	nodes_per_generation = []
+	links_per_generation = []
+	
 	i=1
 	'''
 	fileExists = os.path.isfile('NEAT_Population/population')
@@ -174,11 +181,9 @@ def train(worldRef):
 				print("Fitness: ",i.GetFitness())
 	else:
 	'''
-	substrate = NEAT.Substrate([(-1., -1., 0.0), (-.5, -1., 0.0), (0.0, -1., 0.0),
-                            (.5, -1., 0.0), (1.0, -1., 0.0), (0.0, -1.0, -1.0),
-    ],
+	substrate = NEAT.Substrate(worldRef.bev_substrate,
                            [],
-                           [(-1., 1., 0.0), (1.0,1.0,0.0)])
+                           worldRef.bev_substrate)
 
 	substrate.m_allow_input_hidden_links = False
 	substrate.m_allow_input_output_links = False
@@ -191,28 +196,43 @@ def train(worldRef):
 
 	# let's set the activation functions
 	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
-	substrate.m_output_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+	substrate.m_output_nodes_activation = NEAT.ActivationFunction.UNSIGNED_SIGMOID
 
 	# when to output a link and max weight
 	substrate.m_link_threshold = 0.2
 	substrate.m_max_weight_and_bias = 8.0
 	
-	
-	g = NEAT.Genome(0,
-                    substrate.GetMinCPPNInputs(),
+	fileExists = False
+	#fileExists = os.path.isfile('HyperNEAT_Population/population.txt')
+	#fileExists = os.path.isfile('HyperNEAT_Population/genome.txt')
+	if fileExists:
+		print("There is a previous stored population, loading it")
+		#f = open('HyperNEAT_Population/population.txt', 'r')
+		#print (f)
+		#pop = NEAT.Population('HyperNEAT_Population/population.txt')
+		#g = NEAT.Genome('HyperNEAT_Population/genome.txt')
+		'''		
+		print("Printing loaded popuation")
+		for s in pop.Species:
+			for i in s.Individuals:
+				print("Fitness: ",i.GetFitness())
+		'''
+	else:
+		g = NEAT.Genome(0,
+                    substrate.GetMinCPPNInputs()+1,
                     0,
                     substrate.GetMinCPPNOutputs(),
                     False,
-                    NEAT.ActivationFunction.TANH,
-                    NEAT.ActivationFunction.TANH,
+                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
+                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
                     0,
                     params)
 
-	pop = NEAT.Population(g, params, True, 1.0,i)
-	pop.RNG.Seed(i)
+		pop = NEAT.Population(g, params, True, 1.0,i)
+		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(1):
+	for generation in range(100):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -236,8 +256,15 @@ def train(worldRef):
 		if best > global_best:
 			best_genome_ever = best_genome_this_run
 
-		evaluate(worldRef,best_genome_this_run,index,True)
-
+		evaluate(worldRef,best_genome_this_run,substrate,index,True)
+		best_fitness_per_generation.append(best)
+		species_per_generation.append(len(pop.Species))
+		nodes_per_generation.append(best_genome_this_run.NumNeurons())
+		links_per_generation.append(best_genome_this_run.NumLinks())
+		#print("The best genome is: ",best_genome_this_run)
+		#print("The best genome type is: ",type(best_genome_this_run))
+		locationToSave = "HyperNEAT_Test/Generation_"+str(generation)
+		best_genome_this_run.Save(locationToSave)
 		pop.Epoch()
 
 		print("Generation: ",generation)
@@ -249,7 +276,7 @@ def train(worldRef):
 			break
 
 	net = NEAT.NeuralNetwork()
-	best_genome_ever.BuildPhenotype(net)
+	best_genome_ever.BuildHyperNEATPhenotype(net,substrate)
 
 	for keeper in worldRef.keeperArray:
 		keeper.receiveBest(net)
@@ -266,8 +293,39 @@ def train(worldRef):
 	with open('NEAT_Population/population', 'wb') as f:
             cPickle.dump(pop, f)
 	'''
+	best_genome_ever.Save('HyperNEAT_Population/genome.txt')
 
-	worldRef.reseGameForTraining()
+	worldRef.resetGameForTraining()
+	plt.plot(best_fitness_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Maximum Fitness per Genetation")
+	plt.title("Maximum Fitness per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(species_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Species per Genetation")
+	plt.title("Number of Species per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(nodes_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Nodes in Genome of Fittest Individual per Genetation")
+	plt.title("Number of Nodes in Genome of Fittest Individual per Generation for NEAT Agent")
+	plt.show()
+	plt.hold()
+
+
+	plt.plot(links_per_generation)
+	plt.xlabel("Generation")
+	plt.ylabel("Number of Links in Genome of Fittest Individual per Genetation")
+	plt.title("Number of Links in Genome of Fittest Individual per Generation for NEAT Agent")
+	plt.show()
+
 	
 	return True
 

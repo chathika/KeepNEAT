@@ -74,7 +74,7 @@ class keepAway():
 		#the simple state variables for agents like NEAT, novelty search, and maybe sarsa
 		self.simpleStateVars = None
 		
-		self.alreadyTrained = False
+		self.alreadyTrained = False  #False if you want agent to learn and True if you want to demo
 		
 		#setup all the initial keepers and takers. They are all starting at different field positions, which is why
 		#you can't have a for loop just iterate and declare all of them
@@ -1044,4 +1044,13 @@ class keepAway():
 		:rtype: integer
 		"""
 		return self.__display_height
+
+	def get_field_center(self):
+		"""
+		this simply gets and returns center coordinate of the field 
+		
+		:returns: center of field coordinate
+		:rtype: tuple of floats
+		"""
+		return self.__field_center
 
