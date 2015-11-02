@@ -49,7 +49,7 @@ params.BandThreshold = 0.3
 params.InitialDepth = 3
 params.MaxDepth = 4
 params.IterationLevel = 1
-params.Leo = True
+params.Leo = False
 params.GeometrySeed = True
 params.LeoSeed = True
 params.LeoThreshold = 0.3
@@ -232,7 +232,7 @@ def train(worldRef):
 		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(100):
+	for generation in range(10):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -263,7 +263,7 @@ def train(worldRef):
 		links_per_generation.append(best_genome_this_run.NumLinks())
 		#print("The best genome is: ",best_genome_this_run)
 		#print("The best genome type is: ",type(best_genome_this_run))
-		locationToSave = "HyperNEAT_Test/Generation_"+str(generation)
+		locationToSave = "HyperNEAT_Test/Generation_"+str(generation)+".txt"
 		best_genome_this_run.Save(locationToSave)
 		pop.Epoch()
 
