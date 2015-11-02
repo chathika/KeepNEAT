@@ -195,7 +195,7 @@ def train(worldRef):
 	substrate.m_allow_looped_output_links = False
 
 	# let's set the activation functions
-	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.UNSIGNED_SIGMOID
 	substrate.m_output_nodes_activation = NEAT.ActivationFunction.UNSIGNED_SIGMOID
 
 	# when to output a link and max weight
@@ -219,7 +219,7 @@ def train(worldRef):
 		'''
 	else:
 		g = NEAT.Genome(0,
-                    substrate.GetMinCPPNInputs()+1,
+                    substrate.GetMinCPPNInputs(),
                     0,
                     substrate.GetMinCPPNOutputs(),
                     False,

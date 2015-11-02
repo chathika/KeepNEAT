@@ -77,10 +77,16 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(np.array(self.bevList)) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
+		print("Printing input of NN")		
+		print(self.bevList)
 		#for _ in range(2):
 		self.NN.Activate()
 		o = self.NN.Output()
-
+		
+		print("Printing output of NN")
+		for i in range(len(o)):
+			print o[i],' ',
+		print()
 		#print(len(o))
 		holdDecision = 0
 		passList = []
