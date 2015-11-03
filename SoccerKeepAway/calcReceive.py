@@ -164,9 +164,10 @@ def __calc_receive_ball_moving(worldRef, inputDirection, possessingKeeperIndex):
         rDecision = [argmin, __calcOptimal(worldRef, worldRef.keeperArray, argmin, bestPerpIntersect)]
         return rDecision
     else:
-        #print("no argmin found. game about to crash for sure")
-        return None
-            
+		rDecision = [1 , worldRef.get_field_center()]
+		#print("no argmin found. game about to end for sure.")
+		return rDecision
+    
 #once an agent is determined to be the one in best position to get to the ball, then 
 #the next step is to try intercepting it. Calc optimal will check to see if the 
 #perpendicular intercept is out of play region. If so, it will iteratively change

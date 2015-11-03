@@ -74,7 +74,7 @@ class keepAway():
 		#the simple state variables for agents like NEAT, novelty search, and maybe sarsa
 		self.simpleStateVars = None
 		
-		self.alreadyTrained = False
+		self.alreadyTrained = False  #False if you want agent to learn and True if you want to demo
 		
 		#setup all the initial keepers and takers. They are all starting at different field positions, which is why
 		#you can't have a for loop just iterate and declare all of them
@@ -106,7 +106,7 @@ class keepAway():
 		self.bev = birdsEyeView.birdsEyeView(self.__agent_block_size, self.__ball_block_size)
 		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -811,10 +811,10 @@ class keepAway():
 		#get the state variables
 		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_subsrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_subsrate)
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate)
 
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
@@ -1044,4 +1044,13 @@ class keepAway():
 		:rtype: integer
 		"""
 		return self.__display_height
+
+	def get_field_center(self):
+		"""
+		this simply gets and returns center coordinate of the field 
+		
+		:returns: center of field coordinate
+		:rtype: tuple of floats
+		"""
+		return self.__field_center
 
