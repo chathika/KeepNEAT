@@ -15,7 +15,7 @@ class runme():
     either by user interupt, or by the game ending, print out the results. 
     """
     def __init__(self):
-        world = keepAway.keepAway(alreadyTrained = True)
+        world = keepAway.keepAway(alreadyTrained = False)
         mode =world.game_intro()
         
         if (mode == "hyperNEAT"):
@@ -29,7 +29,7 @@ class runme():
             print("execute hand coded")
         elif (mode == "manual"):
             print("execute manual debugging mode")
-        world.gameLoop(mode, turnOnGrid = True)
+        world.gameLoop(mode, turnOnGrid = False)
         world.pause("game over. Final Score: ", world.keeperScore)
         
 

@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 
 params = NEAT.Parameters()
 params.PopulationSize = 150
+
+'''
 params.DynamicCompatibility = True
 params.AllowClones = True
 params.CompatTreshold = 5.0
@@ -49,11 +51,11 @@ params.BandThreshold = 0.3
 params.InitialDepth = 3
 params.MaxDepth = 4
 params.IterationLevel = 1
-params.Leo = False
-params.GeometrySeed = True
-params.LeoSeed = True
+params.Leo = False #Initially True
+params.GeometrySeed = False #Initially True
+params.LeoSeed = False #Initially True
 params.LeoThreshold = 0.3
-params.CPPN_Bias = -3.0
+params.CPPN_Bias = 1.0
 params.Qtree_X = 0.0
 params.Qtree_Y = 0.0
 params.Width = 1.
@@ -67,6 +69,34 @@ params.MinActivationA = 0.05;
 params.MaxActivationA = 6.0;
 
 params.MutateNeuronActivationTypeProb = 0.03;
+'''
+
+params.DynamicCompatibility = True;
+params.CompatTreshold = 2.0;
+params.YoungAgeTreshold = 15;
+params.SpeciesMaxStagnation = 100;
+params.OldAgeTreshold = 35;
+params.MinSpecies = 5;
+params.MaxSpecies = 25;
+params.RouletteWheelSelection = False;
+
+params.MutateRemLinkProb = 0.02;
+params.RecurrentProb = 0;
+params.OverallMutationRate = 0.15;
+params.MutateAddLinkProb = 0.08;
+params.MutateAddNeuronProb = 0.01;
+params.MutateWeightsProb = 0.90;
+params.MaxWeight = 8.0;
+params.WeightMutationMaxPower = 0.2;
+params.WeightReplacementMaxPower = 1.0;
+
+params.MutateActivationAProb = 0.0;
+params.ActivationAMutationMaxPower = 0.5;
+params.MinActivationA = 0.05;
+params.MaxActivationA = 6.0;
+
+params.MutateNeuronActivationTypeProb = 0.03;
+
 
 params.ActivationFunction_SignedSigmoid_Prob = 0.0;
 params.ActivationFunction_UnsignedSigmoid_Prob = 1.0;
@@ -93,68 +123,73 @@ def evaluate(worldRef, genome, substrate, i, display = False):
 	clock = pygame.time.Clock()
 	#print("Starting evaluation ",i)
 	net = NEAT.NeuralNetwork()
-	genome.BuildHyperNEATPhenotype(net, substrate)
-	worldRef.displayGraphics = True
-	worldRef.resetGameForTraining()
-	#print("Game reset for training")
-	#counter = 0
-	showDisplay = display
-	while worldRef.isGameOver() == False:
-		#print("Entering while game is not over for ",counter,"  time")
-		#counter += 1
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-			    gameExit = True
-		worldRef._sendCalcReceiveDecision()
-		worldRef._sendSimpleStateVars()
-		#reward = 100000
+	try:
+		genome.BuildHyperNEATPhenotype(net, substrate)
+		worldRef.displayGraphics = True
+		worldRef.resetGameForTraining()
+		#print("Game reset for training")
+		#counter = 0
+		showDisplay = display
+		while worldRef.isGameOver() == False:
+			#print("Entering while game is not over for ",counter,"  time")
+			#counter += 1
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					gameExit = True
+			worldRef._sendCalcReceiveDecision()
+			worldRef._sendBirdsEyeView()
+			#reward = 100000
 
-		for keeper in worldRef.keeperArray:
-			keeper.receiveNN(net)
-			#print(super(keeper))
-			keeper.decisionFlowChart("NEAT trying to move")
-		for taker in worldRef.takerArray:
-			taker.decisionFlowChart("NEAT trying to move")
+			for keeper in worldRef.keeperArray:
+				keeper.receiveNN(net)
+				#print(super(keeper))
+				keeper.decisionFlowChart("NEAT trying to move")
+			for taker in worldRef.takerArray:
+				taker.decisionFlowChart("NEAT trying to move")
 		
-		'''    
-		newBallPoint = kUtil.addVectorToPoint(worldRef.fieldBall.trueBallPos, kUtil.scalarMultiply(worldRef.maxBallSpeed, kUtil.unitVector(worldRef.fieldBall.trueBallDirection)))
-		worldRef.fieldBall.updateCoordinate(newBallPoint)
-		for i in range(len(worldRef.takerArray)):
-			worldRef.takerArray[i].noisyBallPos = kUtil.getNoisyVals(worldRef.fieldBall.trueBallPos, worldRef.takerArray[i].sigma)
-		for i in range(len(worldRef.keeperArray)):
-			worldRef.keeperArray[i].noisyBallPos = kUtil.getNoisyVals(worldRef.fieldBall.trueBallPos, worldRef.keeperArray[i].sigma)                
-		worldRef.updateBallPosession()
-		worldRef.updateScore()
-		if(worldRef.displayGraphics == True):
-			worldRef.drawWorld ()
-			worldRef.displayScore()
-			pygame.display.update()
-		'''
-		if(display):
-			# draw the phenotype
-			img = np.zeros((450, 450, 3), dtype=np.uint8)
-			img += 10
-			NEAT.DrawPhenotype(img, (0, 0, 450, 450), net ,15, 3, substrate)
-			cv2.imshow("current best", img)
-			cv2.waitKey(1)
+			'''    
+			newBallPoint = kUtil.addVectorToPoint(worldRef.fieldBall.trueBallPos, kUtil.scalarMultiply(worldRef.maxBallSpeed, kUtil.unitVector(worldRef.fieldBall.trueBallDirection)))
+			worldRef.fieldBall.updateCoordinate(newBallPoint)
+			for i in range(len(worldRef.takerArray)):
+				worldRef.takerArray[i].noisyBallPos = kUtil.getNoisyVals(worldRef.fieldBall.trueBallPos, worldRef.takerArray[i].sigma)
+			for i in range(len(worldRef.keeperArray)):
+				worldRef.keeperArray[i].noisyBallPos = kUtil.getNoisyVals(worldRef.fieldBall.trueBallPos, worldRef.keeperArray[i].sigma)                
+			worldRef.updateBallPosession()
+			worldRef.updateScore()
+			if(worldRef.displayGraphics == True):
+				worldRef.drawWorld ()
+				worldRef.displayScore()
+				pygame.display.update()
+			'''
+			if(display):
+				# draw the phenotype
+				img = np.zeros((450, 450, 3), dtype=np.uint8)
+				img += 10
+				NEAT.DrawPhenotype(img, (0, 0, 450, 450), net ,15, 3, substrate)
+				cv2.imshow("current best", img)
+				cv2.waitKey(1)
 
-			## Draw stuff
-			screen.fill(THECOLORS["black"])
+				## Draw stuff
+				screen.fill(THECOLORS["black"])
 
-			### Draw stuff
-			draw(screen, space)
+				### Draw stuff
+				draw(screen, space)
 
-			### Flip screen
-			pygame.display.flip()
-			clock.tick(10000)
+				### Flip screen
+				pygame.display.flip()
+				clock.tick(10000)
 
 
-		worldRef.commonFunctionality(showDisplay)
-		worldRef.clock.tick(10000)
+			worldRef.commonFunctionality(showDisplay)
+			worldRef.clock.tick(10000)
 
-	#print("Ending Evaluation ",i)
+		#print("Ending Evaluation ",i)
 
-	return worldRef.keeperScore
+		return worldRef.keeperScore
+	
+	except Exception as ex:
+		print('Exception:', ex)
+		return 1.0
 
 	
 
@@ -184,6 +219,10 @@ def train(worldRef):
 	substrate = NEAT.Substrate(worldRef.bev_substrate,
                            [],
                            worldRef.bev_substrate)
+	#substrate.m_with_distance = True;
+
+	print("Printing the substrate")
+	print(worldRef.bev_substrate)
 
 	substrate.m_allow_input_hidden_links = False
 	substrate.m_allow_input_output_links = False
@@ -195,8 +234,8 @@ def train(worldRef):
 	substrate.m_allow_looped_output_links = False
 
 	# let's set the activation functions
-	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.UNSIGNED_SIGMOID
-	substrate.m_output_nodes_activation = NEAT.ActivationFunction.UNSIGNED_SIGMOID
+	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
+	substrate.m_output_nodes_activation = NEAT.ActivationFunction.TANH
 
 	# when to output a link and max weight
 	substrate.m_link_threshold = 0.2
@@ -223,8 +262,8 @@ def train(worldRef):
                     0,
                     substrate.GetMinCPPNOutputs(),
                     False,
-                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
-                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
+                    NEAT.ActivationFunction.TANH,
+                    NEAT.ActivationFunction.TANH,
                     0,
                     params)
 
@@ -248,13 +287,14 @@ def train(worldRef):
 		for i,gen in enumerate(genome_list):
 			fitness = 0
 			for j in range(5):
-				fitness += evaluate(worldRef,gen,substrate,i)
+				fitness += evaluate(worldRef,gen,substrate,i,True)
 			gen.SetFitness((fitness/5))
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])
 		best_genome_this_run = pop.Species[index].GetLeader()
 		if best > global_best:
 			best_genome_ever = best_genome_this_run
+			global_best = best
 
 		evaluate(worldRef,best_genome_this_run,substrate,index,True)
 		best_fitness_per_generation.append(best)

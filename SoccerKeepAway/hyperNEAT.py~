@@ -75,18 +75,21 @@ class hyperNEAT(agent.agent):
 		"""
 		#print("Entering decision function")
 		self.NN.Flush()
-		self.NN.Input(np.array(self.bevList)) # can input numpy arrays, too
+		self.NN.Input(self.bevList) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
 		print("Printing input of NN")		
 		print(self.bevList)
-		#for _ in range(2):
-		self.NN.Activate()
+		for _ in range(10000):
+			self.NN.Activate()
 		o = self.NN.Output()
 		
 		print("Printing output of NN")
 		for i in range(len(o)):
 			print o[i],' ',
 		print()
+
+		#print("Printing Connections")
+		#print(len(self.NN.m_connections))
 		#print(len(o))
 		holdDecision = 0
 		passList = []
@@ -106,7 +109,7 @@ class hyperNEAT(agent.agent):
 			
 		#out,i = max([(x,y) for y,x in enumerate(o)])
 
-		if (o[holdDecision] >= o[passList[0]]) and (o[holdDecision] >= o[passList[1]]):
+		if (o[holdDecision] > o[passList[0]]) and (o[holdDecision] > o[passList[1]]):
 			self._holdBall()
 		else:
 			if o[passList[0]] >= o[passList[1]]:

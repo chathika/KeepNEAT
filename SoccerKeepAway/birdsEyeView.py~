@@ -211,7 +211,7 @@ class birdsEyeView():
                 returnGrid[int(tile[0])][int(tile[1])] += -0.3
         for path in keeperPaths:
             for tile in path:
-                returnGrid[int(tile[0])][int(tile[1])] += 0.3
+                returnGrid[int(tile[0])][int(tile[1])] += 1.3
         
         for i in range(len(keeperPositions)):
             if i != 0: 
@@ -241,6 +241,7 @@ class birdsEyeView():
             #convert all the points back to the right octant
             points[i] = converters[1](points[i])
         return points
+
         
 
 #note: only tested octant 1. too tedious to test all 8
