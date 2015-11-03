@@ -16,7 +16,7 @@ class keepAway():
 	whatsoever of variables and functions within keepAway. 
 	"""
 
-	def __init__(self, inputAgentSigmaNoise = .1):
+	def __init__(self, inputAgentSigmaNoise = .1, alreadyTrained = True):
 		pygame.init()
 		#RGB color
 		self.__white = (255,255,255) 
@@ -74,7 +74,7 @@ class keepAway():
 		#the simple state variables for agents like NEAT, novelty search, and maybe sarsa
 		self.simpleStateVars = None
 		
-		self.alreadyTrained = False  #False if you want agent to learn and True if you want to demo
+		self.alreadyTrained = alreadyTrained  #False if you want agent to learn and True if you want to demo
 		
 		#setup all the initial keepers and takers. They are all starting at different field positions, which is why
 		#you can't have a for loop just iterate and declare all of them
