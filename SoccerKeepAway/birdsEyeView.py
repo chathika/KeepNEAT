@@ -207,11 +207,13 @@ class birdsEyeView():
                 returnGrid[i].append(0.0) 
                 
         for path in takerPaths:
-            for tile in path:
-                returnGrid[int(tile[0])][int(tile[1])] += -0.3
+			if path != None:
+				for tile in path:
+					returnGrid[int(tile[0])][int(tile[1])] += -0.3
         for path in keeperPaths:
-            for tile in path:
-                returnGrid[int(tile[0])][int(tile[1])] += 0.3
+			if path != None:
+				for tile in path:
+					returnGrid[int(tile[0])][int(tile[1])] += 0.3
         
         for i in range(len(keeperPositions)):
             if i != 0: 

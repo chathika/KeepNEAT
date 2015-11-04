@@ -22,6 +22,14 @@ class hyperNEAT(agent.agent):
 			substrate = MNEAT.Substrate(worldRef.bev_substrate,
                            [],
                            worldRef.bev_substrate)
+			substrate.m_allow_input_hidden_links = False
+			substrate.m_allow_input_output_links = True
+			substrate.m_allow_hidden_hidden_links = False
+			substrate.m_allow_hidden_output_links = False
+			substrate.m_allow_output_hidden_links = False
+			substrate.m_allow_output_output_links = False
+			substrate.m_allow_looped_hidden_links = False
+			substrate.m_allow_looped_output_links = False
 
 			g = MNEAT.Genome('HyperNEAT_Population/genome.txt')
 			self.NN = MNEAT.NeuralNetwork()
@@ -77,22 +85,23 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(self.bevList) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
-		print("Printing input of NN")		
-		print(self.bevList)
-		for _ in range(10000):
-			self.NN.Activate()
+		#print("Printing input of NN")		
+		#print(self.bevList)
+		#for _ in range(10000):
+		self.NN.Activate()
 		o = self.NN.Output()
 		
+		'''
 		print("Printing output of NN")
 		for i in range(len(o)):
 			print o[i],' ',
 		print()
-
+		'''
 		#print("Printing Connections")
 		#print(len(self.NN.m_connections))
 		#print(len(o))
 		holdDecision = 0
-		passList = []
+		passList = [0,0]
 		for j in range(len(self.bevList)):
 			if self.bevList[j] == 1.0001:
 				holdDecision = j
@@ -100,6 +109,22 @@ class hyperNEAT(agent.agent):
 				passList.append(j)
 
 		keeperIndex = [0,0]
+		try:
+			if self.bevSubstrate[holdDecision] == 0:
+				a=0
+		except Exception as ex:
+			print("Exception with hold ball. Value: ",holdDecision)
+		try:
+			if self.bevSubstrate[passList[0]] == 0:
+				a=0
+		except Exception as ex:
+			print("Exception with pass 0. Value: ",passList[0])
+		try:
+			if self.bevSubstrate[passList[1]] == 0:
+				a=0
+		except Exception as ex:
+			print("Exception with pass 1. Value: ",passList[1])
+
 		if (kUtil.getSqrDist(self.bevSubstrate[holdDecision],self.bevSubstrate[passList[0]])) <= (kUtil.getSqrDist(self.bevSubstrate[holdDecision],self.bevSubstrate[passList[1]])):
 			keeperIndex[0] = 1
 			keeperIndex[1] = 2
