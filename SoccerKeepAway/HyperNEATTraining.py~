@@ -78,13 +78,13 @@ params.SpeciesMaxStagnation = 100;
 params.OldAgeTreshold = 35;
 params.MinSpecies = 5;
 params.MaxSpecies = 25;
-params.RouletteWheelSelection = False;
+params.RouletteWheelSelection = True;
 
 params.MutateRemLinkProb = 0.02;
 params.RecurrentProb = 0;
 params.OverallMutationRate = 0.15;
 params.MutateAddLinkProb = 0.08;
-params.MutateAddNeuronProb = 0.01;
+params.MutateAddNeuronProb = 0.05;
 params.MutateWeightsProb = 0.90;
 params.MaxWeight = 8.0;
 params.WeightMutationMaxPower = 0.2;
@@ -95,7 +95,9 @@ params.ActivationAMutationMaxPower = 0.5;
 params.MinActivationA = 0.05;
 params.MaxActivationA = 6.0;
 
-params.MutateNeuronActivationTypeProb = 0.03;
+params.MutateNeuronActivationTypeProb = 0.05;
+
+params.CPPN_Bias = 1.0
 
 
 params.ActivationFunction_SignedSigmoid_Prob = 0.0;
@@ -240,6 +242,8 @@ def train(worldRef):
 	# when to output a link and max weight
 	substrate.m_link_threshold = 0.2
 	substrate.m_max_weight_and_bias = 8.0
+
+	substrate.m_with_distance = True;
 	
 	fileExists = False
 	#fileExists = os.path.isfile('HyperNEAT_Population/population.txt')
