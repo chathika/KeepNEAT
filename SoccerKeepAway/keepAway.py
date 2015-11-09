@@ -16,7 +16,7 @@ class keepAway():
 	whatsoever of variables and functions within keepAway. 
 	"""
 
-	def __init__(self, inputAgentSigmaNoise = .1, alreadyTrained = True):
+	def __init__(self, inputAgentSigmaNoise = .1, alreadyTrained = True, bevCustomTileSize = None):
 		pygame.init()
 		#RGB color
 		self.__white = (255,255,255) 
@@ -103,10 +103,12 @@ class keepAway():
 		self.verysmallfont = pygame.font.SysFont("comicsansms", 12)
 		
 		#birdsEyeView generator for agents like hyperNEAT:
-		self.bev = birdsEyeView.birdsEyeView(10, self.__ball_block_size)
-		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		if bevCustomTileSize == None:
+			bevCustomTileSize = self.__agent_block_size
+		self.bev = birdsEyeView.birdsEyeView(self.__display_width, self.__display_height, bevCustomTileSize, self.__ball_block_size )
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -249,9 +251,6 @@ class keepAway():
 		#note: for blit function, give it column, row instead of row, column
 		self.gameDisplay.blit(self.__worldImage, (0,0))
 		
-		if (grid != None and substrate != None):
-			self.__drawBirdsEyeView(grid, substrate)
-		
 		for i in range(len(self.keeperArray)):
 			self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
 			"""
@@ -267,6 +266,9 @@ class keepAway():
 		#you may want to comment this code out after debugging is done
 		if (self.keeperArray[0].onReceiveDecision != None):
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
+				
+		if (grid != None and substrate != None):
+			self.__drawBirdsEyeView(grid, substrate)
 
 	def __drawBirdsEyeView(self, grid, substrate):
 		for i in range(len(grid)):
@@ -289,10 +291,9 @@ class keepAway():
 			i = substrate[z][0]
 			j = substrate[z][1]
 			self.gameDisplay.blit(self.__debugYellowDotImage, (j,i))
-			
-					
-
-
+		kZeroIndex = self.bev.getBallHolderTile(self.keeperArray)
+		self.gameDisplay.blit(self.__debugRedDotImage, (substrate[kZeroIndex][1], substrate[kZeroIndex][0]))
+							
 	def __updateScore(self):
 		"""
 		This function simply increments the keeper's score for each tick that the
@@ -809,9 +810,9 @@ class keepAway():
 
 	def _sendBirdsEyeView(self):
 		#get the state variables
-		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
 			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate)
@@ -861,8 +862,8 @@ class keepAway():
 		#remove this line if you don't want the grid to be drawn
 		if showDisplay:
 			if (turnOnGrid):
-				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
-				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
+				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray)
+				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray)
 				self.__drawWorld (grid, substrate)
 			else:
 				self.__drawWorld()
