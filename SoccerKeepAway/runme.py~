@@ -15,7 +15,7 @@ class runme():
     either by user interupt, or by the game ending, print out the results. 
     """
     def __init__(self):
-        world = keepAway.keepAway(alreadyTrained = False)
+        world = keepAway.keepAway(0.000000001, alreadyTrained = False)
         mode =world.game_intro()
         
         if (mode == "hyperNEAT"):

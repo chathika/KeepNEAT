@@ -110,17 +110,20 @@ class hyperNEAT(agent.agent):
 
 		keeperIndex = [0,0]
 		try:
-			if self.bevSubstrate[holdDecision] == 0:
+			if self.bevSubstrate[holdDecision]:
+				#print("Value for holding is:   ",o[holdDecision])
 				a=0
 		except Exception as ex:
 			print("Exception with hold ball. Value: ",holdDecision)
 		try:
-			if self.bevSubstrate[passList[0]] == 0:
+			if self.bevSubstrate[passList[0]]:
+				#print("Value for passing 0 is: ",o[passList[0]])
 				a=0
 		except Exception as ex:
 			print("Exception with pass 0. Value: ",passList[0])
 		try:
-			if self.bevSubstrate[passList[1]] == 0:
+			if self.bevSubstrate[passList[1]]:
+				#print("Value for passing 1 is: ",o[passList[1]])
 				a=0
 		except Exception as ex:
 			print("Exception with pass 1. Value: ",passList[1])
@@ -134,12 +137,15 @@ class hyperNEAT(agent.agent):
 			
 		#out,i = max([(x,y) for y,x in enumerate(o)])
 
-		if (o[holdDecision] > o[passList[0]]) and (o[holdDecision] > o[passList[1]]):
+		if (o[holdDecision] >= o[passList[0]]) and (o[holdDecision] >= o[passList[1]]):
+			#print("Holding ball")
 			self._holdBall()
 		else:
 			if o[passList[0]] >= o[passList[1]]:
+				#print("Pass 0")
 				self._passBall(keeperIndex[0])
 			else:
+				#print("Pass 1")
 				self._passBall(keeperIndex[1])
 
 		#print("The decision is: ",i)

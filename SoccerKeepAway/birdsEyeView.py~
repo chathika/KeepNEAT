@@ -219,7 +219,7 @@ class birdsEyeView():
             if i != 0: 
                 returnGrid[int(keeperPositions[i][0])][int(keeperPositions[i][1])] = 1.0
             else:
-                returnGrid[int(keeperPositions[i][0])][int(keeperPositions[i][1])] = 1.0001
+                returnGrid[int(keeperPositions[i][0])][int(keeperPositions[i][1])] = 1.1
         for tile in takerPositions:
             returnGrid[int(tile[0])][int(tile[1])] = -1.0
         

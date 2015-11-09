@@ -21,7 +21,7 @@ import os.path
 import matplotlib.pyplot as plt
 
 params = NEAT.Parameters()
-params.PopulationSize = 150
+params.PopulationSize = 300
 
 '''
 params.DynamicCompatibility = True
@@ -71,47 +71,52 @@ params.MaxActivationA = 6.0;
 params.MutateNeuronActivationTypeProb = 0.03;
 '''
 
-params.DynamicCompatibility = True;
-params.CompatTreshold = 2.0;
-params.YoungAgeTreshold = 15;
-params.SpeciesMaxStagnation = 100;
-params.OldAgeTreshold = 35;
-params.MinSpecies = 5;
-params.MaxSpecies = 25;
-params.RouletteWheelSelection = True;
 
-params.MutateRemLinkProb = 0.02;
-params.RecurrentProb = 0;
-params.OverallMutationRate = 0.15;
-params.MutateAddLinkProb = 0.08;
-params.MutateAddNeuronProb = 0.05;
-params.MutateWeightsProb = 0.90;
-params.MaxWeight = 8.0;
-params.WeightMutationMaxPower = 0.2;
-params.WeightReplacementMaxPower = 1.0;
+params.AllowClones = False
+params.DynamicCompatibility = True
+params.CompatTreshold = 2.0
+params.YoungAgeTreshold = 15
+params.SpeciesMaxStagnation = 10
+params.OldAgeTreshold = 35
+params.MinSpecies = 25
+params.MaxSpecies = 50
+params.RouletteWheelSelection = True
 
-params.MutateActivationAProb = 0.0;
-params.ActivationAMutationMaxPower = 0.5;
-params.MinActivationA = 0.05;
-params.MaxActivationA = 6.0;
+params.MutateRemLinkProb = 0.01
+params.RecurrentProb = 0
+params.OverallMutationRate = 0.15
+params.MutateAddLinkProb = 0.08
+params.MutateAddNeuronProb = 0.04
+params.MutateWeightsProb = 0.70
+params.MaxWeight = 8.0
+params.WeightMutationMaxPower = 0.2
+params.WeightReplacementMaxPower = 1.0
 
-params.MutateNeuronActivationTypeProb = 0.05;
+params.MutateActivationAProb = 0.0
+params.ActivationAMutationMaxPower = 0.5
+params.MinActivationA = 0.05
+params.MaxActivationA = 6.0
 
-params.CPPN_Bias = 1.0
+params.MutateNeuronActivationTypeProb = 0.02
 
+params.CPPN_Bias = -1.0
 
-params.ActivationFunction_SignedSigmoid_Prob = 0.0;
-params.ActivationFunction_UnsignedSigmoid_Prob = 1.0;
-params.ActivationFunction_Tanh_Prob = 1.0;
-params.ActivationFunction_TanhCubic_Prob = 0.0;
-params.ActivationFunction_SignedStep_Prob = 1.0;
-params.ActivationFunction_UnsignedStep_Prob = 0.0;
-params.ActivationFunction_SignedGauss_Prob = 1.0;
-params.ActivationFunction_UnsignedGauss_Prob = 0.0;
-params.ActivationFunction_Abs_Prob = 1.0;
-params.ActivationFunction_SignedSine_Prob = 1.0;
-params.ActivationFunction_UnsignedSine_Prob = 0.0;
-params.ActivationFunction_Linear_Prob = 1.0;
+params.Elitism = 0.05
+
+params.SurvivalRate = 0.05
+
+params.ActivationFunction_SignedSigmoid_Prob = 0.0
+params.ActivationFunction_UnsignedSigmoid_Prob = 1.0
+params.ActivationFunction_Tanh_Prob = 1.0
+params.ActivationFunction_TanhCubic_Prob = 1.0
+params.ActivationFunction_SignedStep_Prob = 1.0
+params.ActivationFunction_UnsignedStep_Prob = 1.0
+params.ActivationFunction_SignedGauss_Prob = 1.0
+params.ActivationFunction_UnsignedGauss_Prob = 1.0
+params.ActivationFunction_Abs_Prob = 1.0
+params.ActivationFunction_SignedSine_Prob = 1.0
+params.ActivationFunction_UnsignedSine_Prob = 1.0
+params.ActivationFunction_Linear_Prob = 1.0
 
 rng = NEAT.RNG()
 rng.TimeSeed()
@@ -266,8 +271,8 @@ def train(worldRef):
                     0,
                     substrate.GetMinCPPNOutputs(),
                     False,
-                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
-                    NEAT.ActivationFunction.UNSIGNED_SIGMOID,
+                    NEAT.ActivationFunction.TANH,
+                    NEAT.ActivationFunction.TANH,
                     0,
                     params)
 
@@ -275,7 +280,7 @@ def train(worldRef):
 		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	for generation in range(10):
+	for generation in range(200):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
 		#NEAT.ZipFitness(genome_list, fitness_list)
@@ -287,7 +292,7 @@ def train(worldRef):
 		
 		print('All individuals:', len(genome_list))
 		
-		
+		'''
 		for i,gen in enumerate(genome_list):
 			fitness = 0
 			for j in range(5):
@@ -295,7 +300,14 @@ def train(worldRef):
 					fitness += evaluate(worldRef,gen,substrate,i,True)
 				else:
 					fitness += evaluate(worldRef,gen,substrate,i)
-			gen.SetFitness((fitness/5))
+			gen.SetFitness((fitness/5.0))
+		'''
+		for i,gen in enumerate(genome_list):
+			if i%100 == 0:
+				fitness = evaluate(worldRef,gen,substrate,i,True)
+			else:
+				fitness = evaluate(worldRef,gen,substrate,i)
+			gen.SetFitness(fitness)
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])
 		best_genome_this_run = pop.Species[index].GetLeader()
@@ -310,8 +322,10 @@ def train(worldRef):
 		links_per_generation.append(best_genome_this_run.NumLinks())
 		#print("The best genome is: ",best_genome_this_run)
 		#print("The best genome type is: ",type(best_genome_this_run))
-		locationToSave = "HyperNEAT_Test/Generation_"+str(generation)+".txt"
-		best_genome_this_run.Save(locationToSave)
+		#locationToSave = "HyperNEAT_Test/Generation_"+str(generation)+".txt"
+		#best_genome_this_run.Save(locationToSave)
+		locationToSave = "HyperNEAT_Test/Population_"+str(generation)+".txt"
+		pop.Save(locationToSave)
 		pop.Epoch()
 
 		print("Generation: ",generation)

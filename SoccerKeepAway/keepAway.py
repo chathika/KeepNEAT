@@ -103,7 +103,7 @@ class keepAway():
 		self.verysmallfont = pygame.font.SysFont("comicsansms", 12)
 		
 		#birdsEyeView generator for agents like hyperNEAT:
-		self.bev = birdsEyeView.birdsEyeView(self.__agent_block_size, self.__ball_block_size)
+		self.bev = birdsEyeView.birdsEyeView(10, self.__ball_block_size)
 		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
 		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
