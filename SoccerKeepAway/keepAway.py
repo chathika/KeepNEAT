@@ -302,7 +302,7 @@ class keepAway():
 	def __DrawHyperNEATOut(self, output, blockSize, substrate):
 		diff = blockSize / 2
 		for i in range(len(substrate)):
-			text= self.verysmallfont.render(str(round(output[i], 2)), True, self.__black)
+			text= self.verysmallfont.render(str(round(output[i], 2)), True, (0, 0, int(255*output[i])) )
 			self.gameDisplay.blit(text, [substrate[i][1] - diff,substrate[i][0] - diff]) 
 					
 			
