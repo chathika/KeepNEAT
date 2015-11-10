@@ -62,6 +62,7 @@ class agent():
         self.bevGrid = None
         self.bevList = None
         self.bevSubstrate = None
+        self.ballHolderSubIndex = None
         self.worldRef = worldRef
         
         #BALL VARIABLES
@@ -151,7 +152,7 @@ class agent():
         """
         self.stateVariables = noisyVariables
         
-    def receiveBirdsEyeView(self, grid, bevList, substrate):
+    def receiveBirdsEyeView(self, grid, bevList, substrate, ballHolderSubIndex):
         """
         The simulator will call this function in order to give the agent class
         a the birds eye view of the field
@@ -168,6 +169,7 @@ class agent():
         self.bevGrid = grid
         self.bevList = bevList
         self.bevSubstrate = substrate
+        self.ballHolderSubIndex = ballHolderSubIndex
     
     #used only in keepaway.py   
     def receiveDecision(self, rDecision):

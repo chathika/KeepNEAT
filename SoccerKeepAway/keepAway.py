@@ -112,6 +112,7 @@ class keepAway():
 		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
 		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
 		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
+		self.bev_keeper_sub_index = self.bev.getBallHolderTile(self.keeperArray)
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -813,9 +814,10 @@ class keepAway():
 		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
 		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
 		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
+		self.bev_keeper_sub_index = self.bev.getBallHolderTile(self.keeperArray)
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate)
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate, self.bev_keeper_sub_index)
 
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
