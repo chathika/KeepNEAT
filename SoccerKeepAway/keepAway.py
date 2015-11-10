@@ -39,6 +39,9 @@ class keepAway():
 		self.__predictedImage = pygame.image.load('images/x.png')
 		self.__debugYellowDotImage = pygame.image.load('images/yellow_dot.png')
 		self.__debugRedDotImage = pygame.image.load('images/red_dot.png')
+		self.__debugBlackDotImage = pygame.image.load('images/black_dot.png')
+		self.__debugWhiteDotImage = pygame.image.load('images/white_dot.png')
+		self.__debugBlueDotImage = pygame.image.load('images/blue_dot.png')
 		self.__debugTakerPathTile = pygame.image.load('images/takerPathSquare.png')
 		self.__debugKeeperPathTile = pygame.image.load('images/keeperPathSquare.png')
 		self.__debugKeeperTile = pygame.image.load('images/keeperSquare.png')
@@ -236,7 +239,7 @@ class keepAway():
 			self.clock.tick(10)
 
 
-	def __drawWorld (self, grid = None, substrate = None):
+	def __drawWorld (self, gridList = None, substrate = None):
 		"""
 		This function will go and update the screen to display the next frame of 
 		animation. This function should be called only after all the movement
@@ -267,32 +270,29 @@ class keepAway():
 		if (self.keeperArray[0].onReceiveDecision != None):
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
 				
-		if (grid != None and substrate != None):
-			self.__drawBirdsEyeView(grid, substrate)
+		if (gridList != None and substrate != None):
+			self.__drawBirdsEyeView(gridList, substrate)
 
-	def __drawBirdsEyeView(self, grid, substrate):
-		for i in range(len(grid)):
-			for j in range(len(grid[i])):
-				if grid[i][j] == 0.0:
-					self.gameDisplay.blit(self.__debugEmptyTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == -1.0:
-					self.gameDisplay.blit(self.__debugTakerTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == 1.0:
-					self.gameDisplay.blit(self.__debugKeeperTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == 0.3:
-					self.gameDisplay.blit(self.__debugKeeperPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == -0.3:
-					self.gameDisplay.blit(self.__debugTakerPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == -0.6:
-					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == 0.6:
-					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		for z in range(len(substrate)):
+	def __drawBirdsEyeView(self, gridList, substrate):
+		for z in range(len(gridList)):
 			i = substrate[z][0]
 			j = substrate[z][1]
-			self.gameDisplay.blit(self.__debugYellowDotImage, (j,i))
+			if gridList[z] == 0.0:
+				self.gameDisplay.blit(self.__debugWhiteDotImage, (j,i))
+			if gridList[z] == -1.0:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i))
+			if gridList[z] == 1.0:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i))
+			if gridList[z] == 0.3:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i)) 
+			if gridList[z] == -0.3:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i)) 
+			if gridList[z] == -0.6:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i)) 
+			if gridList[z] == 0.6:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i)) 
 		kZeroIndex = self.bev.getBallHolderTile(self.keeperArray)
-		self.gameDisplay.blit(self.__debugRedDotImage, (substrate[kZeroIndex][1], substrate[kZeroIndex][0]))
+		self.gameDisplay.blit(self.__debugBlackDotImage, (substrate[kZeroIndex][1], substrate[kZeroIndex][0]))
 							
 	def __updateScore(self):
 		"""
@@ -862,9 +862,9 @@ class keepAway():
 		#remove this line if you don't want the grid to be drawn
 		if showDisplay:
 			if (turnOnGrid):
-				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray)
+				gridList = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray)
 				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray)
-				self.__drawWorld (grid, substrate)
+				self.__drawWorld (gridList, substrate)
 			else:
 				self.__drawWorld()
 			self.__displayScore()
