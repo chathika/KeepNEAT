@@ -240,7 +240,7 @@ class keepAway():
 			self.clock.tick(10)
 
 
-	def __drawWorld (self, gridList = None, substrate = None):
+	def __drawWorld (self, mode, gridList = None, substrate = None):
 		"""
 		This function will go and update the screen to display the next frame of 
 		animation. This function should be called only after all the movement
@@ -272,9 +272,9 @@ class keepAway():
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
 				
 		if (gridList != None and substrate != None):
-			self.__drawBirdsEyeView(gridList, substrate)
+			self.__drawBirdsEyeView(mode, gridList, substrate)
 
-	def __drawBirdsEyeView(self, gridList, substrate):
+	def __drawBirdsEyeView(self, mode, gridList, substrate):
 		for z in range(len(gridList)):
 			i = substrate[z][0]
 			j = substrate[z][1]
@@ -294,6 +294,18 @@ class keepAway():
 				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i)) 
 		kZeroIndex = self.bev.getBallHolderTile(self.keeperArray)
 		self.gameDisplay.blit(self.__debugBlackDotImage, (substrate[kZeroIndex][1], substrate[kZeroIndex][0]))
+		if(mode == "hyperNEAT"):
+			o = self.keeperArray[0].getNNoutput();
+			if(o != None):
+				self.__DrawHyperNEATOut(o, self.bev.getBlockSize(), substrate)
+					
+	def __DrawHyperNEATOut(self, output, blockSize, substrate):
+		diff = blockSize / 2
+		for i in range(len(substrate)):
+			text= self.verysmallfont.render(str(round(output[i], 2)), True, self.__black)
+			self.gameDisplay.blit(text, [substrate[i][1] - diff,substrate[i][0] - diff]) 
+					
+			
 							
 	def __updateScore(self):
 		"""
@@ -850,7 +862,7 @@ class keepAway():
 
 
 	"""THIS CODE IS THE INTRO AND GAME LOOPS"""
-	def commonFunctionality(self, showDisplay = True, turnOnGrid = False):
+	def commonFunctionality(self, mode, showDisplay = True, turnOnGrid = False):
 		#this is common code that will occur regardless of what agent you picked
 		#if (self.fieldBall.inPosession == False):
 		newBallPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, kUtil.scalarMultiply(self.maxBallSpeed, kUtil.unitVector(self.fieldBall.trueBallDirection)))
@@ -866,9 +878,9 @@ class keepAway():
 			if (turnOnGrid):
 				gridList = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray)
 				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray)
-				self.__drawWorld (gridList, substrate)
+				self.__drawWorld (mode, gridList, substrate)
 			else:
-				self.__drawWorld()
+				self.__drawWorld(mode)
 			self.__displayScore()
 			pygame.display.update()
 
@@ -937,7 +949,7 @@ class keepAway():
 
 		:returns: no return
 		"""  
-		self.__drawWorld ()
+		self.__drawWorld (mode)
 		gameExit = False
 		pygame.display.update()
 		experimentAgent = self.keeperArray[0]
@@ -996,7 +1008,7 @@ class keepAway():
 					keeper.decisionFlowChart()
 				for taker in self.takerArray:
 					taker.decisionFlowChart()
-			self.commonFunctionality(True,turnOnGrid)
+			self.commonFunctionality(mode, True,turnOnGrid)
 	
 			if self.isGameOver() == True:
 				gameExit = True

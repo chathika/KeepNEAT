@@ -77,6 +77,15 @@ class hyperNEAT(agent.agent):
 	def __getBallCenter(self, ballTopLeft):
 		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size()/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size()/2))
 
+	def getNNoutput(self):
+		if (self.NN != None):
+			self.NN.Flush()
+			self.NN.Input(self.bevList) 
+			self.NN.Activate()
+			return self.NN.Output()
+		else:
+			return None;
+	
 	def _decisionFunction(self):
 		"""
 		This is where Magic Happens
