@@ -187,7 +187,7 @@ def evaluate(worldRef, genome, substrate, i, display = False, NNDisplay = False)
 			clock.tick(10000)
 
 		
-		worldRef.commonFunctionality(showDisplay)
+		worldRef.commonFunctionality("hyperNEAT",showDisplay,True)
 		worldRef.clock.tick(10000)
 
 	#print("Ending Evaluation ",i)
@@ -306,7 +306,7 @@ def train(worldRef):
 			if i%100 == 0:
 				fitness = evaluate(worldRef,gen,substrate,i,True)
 			else:
-				fitness = evaluate(worldRef,gen,substrate,i)
+				fitness = evaluate(worldRef,gen,substrate,i,True)
 			gen.SetFitness(fitness)
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])

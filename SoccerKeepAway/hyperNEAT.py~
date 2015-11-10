@@ -77,6 +77,15 @@ class hyperNEAT(agent.agent):
 	def __getBallCenter(self, ballTopLeft):
 		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size()/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size()/2))
 
+	def getNNoutput(self):
+		if (self.NN != None):
+			self.NN.Flush()
+			self.NN.Input(self.bevList) 
+			self.NN.Activate()
+			return self.NN.Output()
+		else:
+			return None;
+	
 	def _decisionFunction(self):
 		"""
 		This is where Magic Happens
@@ -85,28 +94,27 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(self.bevList) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
-		#print("Printing input of NN")		
-		#print(self.bevList)
+		print("Printing input of NN")		
+		print(self.bevList)
 		#for _ in range(10000):
 		self.NN.Activate()
 		o = self.NN.Output()
 		
-		'''
+		
 		print("Printing output of NN")
 		for i in range(len(o)):
 			print o[i],' ',
 		print()
-		'''
+		
 		#print("Printing Connections")
 		#print(len(self.NN.m_connections))
 		#print(len(o))
-		holdDecision = 0
+		holdDecision = self.ballHolderSubIndex
 		passList = [0,0]
 		for j in range(len(self.bevList)):
-			if self.bevList[j] == 1.0001:
-				holdDecision = j
-			elif self.bevList[j] == 1:
+			if self.bevList[j] == 1 and j!=holdDecision:
 				passList.append(j)
+				
 
 		keeperIndex = [0,0]
 		try:

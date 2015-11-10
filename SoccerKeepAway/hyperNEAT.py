@@ -94,28 +94,27 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(self.bevList) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
-		#print("Printing input of NN")		
-		#print(self.bevList)
+		print("Printing input of NN")		
+		print(self.bevList)
 		#for _ in range(10000):
 		self.NN.Activate()
 		o = self.NN.Output()
 		
-		'''
+		
 		print("Printing output of NN")
 		for i in range(len(o)):
 			print o[i],' ',
 		print()
-		'''
+		
 		#print("Printing Connections")
 		#print(len(self.NN.m_connections))
 		#print(len(o))
-		holdDecision = 0
+		holdDecision = self.ballHolderSubIndex
 		passList = [0,0]
 		for j in range(len(self.bevList)):
-			if self.bevList[j] == 1.0001:
-				holdDecision = j
-			elif self.bevList[j] == 1:
+			if self.bevList[j] == 1 and j!=holdDecision:
 				passList.append(j)
+				
 
 		keeperIndex = [0,0]
 		try:
