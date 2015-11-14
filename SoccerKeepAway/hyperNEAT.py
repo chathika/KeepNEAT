@@ -31,6 +31,11 @@ class hyperNEAT(agent.agent):
 			substrate.m_allow_looped_hidden_links = False
 			substrate.m_allow_looped_output_links = False
 
+			substrate.m_link_threshold = 0.2
+			substrate.m_max_weight_and_bias = 8.0
+
+			substrate.m_with_distance = True;
+
 			g = MNEAT.Genome('HyperNEAT_Population/genome.txt')
 			self.NN = MNEAT.NeuralNetwork()
 			g.BuildHyperNEATPhenotype(self.NN, substrate)
@@ -94,18 +99,18 @@ class hyperNEAT(agent.agent):
 		self.NN.Flush()
 		self.NN.Input(self.bevList) # can input numpy arrays, too
 			                          # for some reason only np.float64 is supported
-		print("Printing input of NN")		
-		print(self.bevList)
+		#print("Printing input of NN")		
+		#print(self.bevList)
 		#for _ in range(10000):
 		self.NN.Activate()
 		o = self.NN.Output()
 		
-		
+		'''
 		print("Printing output of NN")
 		for i in range(len(o)):
 			print o[i],' ',
 		print()
-		
+		'''
 		#print("Printing Connections")
 		#print(len(self.NN.m_connections))
 		#print(len(o))

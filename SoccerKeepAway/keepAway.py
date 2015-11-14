@@ -314,8 +314,8 @@ class keepAway():
 		
 		:returns: no return
 		"""
-		if self.fieldBall.inPosession:
-			self.keeperScore += 1
+		#if self.fieldBall.inPosession:
+		self.keeperScore += 1
 		
 	def debugPassVectors(self, startPoint, vectors):
 		"""

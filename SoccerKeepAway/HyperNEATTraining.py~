@@ -137,6 +137,9 @@ def evaluate(worldRef, genome, substrate, i, display = False, NNDisplay = False)
 	#print("Game reset for training")
 	#counter = 0
 	showDisplay = display
+	for keeper in worldRef.keeperArray:
+		keeper.receiveNN(net)
+		
 	while worldRef.isGameOver() == False:
 		#print("Entering while game is not over for ",counter,"  time")
 		#counter += 1
@@ -306,7 +309,7 @@ def train(worldRef):
 			if i%100 == 0:
 				fitness = evaluate(worldRef,gen,substrate,i,True)
 			else:
-				fitness = evaluate(worldRef,gen,substrate,i,True)
+				fitness = evaluate(worldRef,gen,substrate,i)
 			gen.SetFitness(fitness)
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])

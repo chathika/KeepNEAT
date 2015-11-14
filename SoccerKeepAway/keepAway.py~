@@ -16,7 +16,7 @@ class keepAway():
 	whatsoever of variables and functions within keepAway. 
 	"""
 
-	def __init__(self, inputAgentSigmaNoise = .1, alreadyTrained = True):
+	def __init__(self, inputAgentSigmaNoise = .1, alreadyTrained = True, bevCustomTileSize = None):
 		pygame.init()
 		#RGB color
 		self.__white = (255,255,255) 
@@ -39,6 +39,9 @@ class keepAway():
 		self.__predictedImage = pygame.image.load('images/x.png')
 		self.__debugYellowDotImage = pygame.image.load('images/yellow_dot.png')
 		self.__debugRedDotImage = pygame.image.load('images/red_dot.png')
+		self.__debugBlackDotImage = pygame.image.load('images/black_dot.png')
+		self.__debugWhiteDotImage = pygame.image.load('images/white_dot.png')
+		self.__debugBlueDotImage = pygame.image.load('images/blue_dot.png')
 		self.__debugTakerPathTile = pygame.image.load('images/takerPathSquare.png')
 		self.__debugKeeperPathTile = pygame.image.load('images/keeperPathSquare.png')
 		self.__debugKeeperTile = pygame.image.load('images/keeperSquare.png')
@@ -103,10 +106,13 @@ class keepAway():
 		self.verysmallfont = pygame.font.SysFont("comicsansms", 12)
 		
 		#birdsEyeView generator for agents like hyperNEAT:
-		self.bev = birdsEyeView.birdsEyeView(10, self.__ball_block_size)
-		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		if bevCustomTileSize == None:
+			bevCustomTileSize = self.__agent_block_size
+		self.bev = birdsEyeView.birdsEyeView(self.__display_width, self.__display_height, bevCustomTileSize, self.__ball_block_size )
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
+		self.bev_keeper_sub_index = self.bev.getBallHolderTile(self.keeperArray)
 	"""
 	BASIC REQUIRED FUNCTIONS 
 	functions: exit, message to screen, pause, finish execution, draw world, and update score
@@ -234,7 +240,7 @@ class keepAway():
 			self.clock.tick(10)
 
 
-	def __drawWorld (self, grid = None, substrate = None):
+	def __drawWorld (self, mode, gridList = None, substrate = None):
 		"""
 		This function will go and update the screen to display the next frame of 
 		animation. This function should be called only after all the movement
@@ -248,9 +254,6 @@ class keepAway():
 			return                 
 		#note: for blit function, give it column, row instead of row, column
 		self.gameDisplay.blit(self.__worldImage, (0,0))
-		
-		if (grid != None and substrate != None):
-			self.__drawBirdsEyeView(grid, substrate)
 		
 		for i in range(len(self.keeperArray)):
 			self.gameDisplay.blit(self.__keeperImage, (self.keeperTruePosArray[i][1], self.keeperTruePosArray[i][0]))
@@ -267,32 +270,43 @@ class keepAway():
 		#you may want to comment this code out after debugging is done
 		if (self.keeperArray[0].onReceiveDecision != None):
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
+				
+		if (gridList != None and substrate != None):
+			self.__drawBirdsEyeView(mode, gridList, substrate)
 
-	def __drawBirdsEyeView(self, grid, substrate):
-		for i in range(len(grid)):
-			for j in range(len(grid[i])):
-				if grid[i][j] == 0.0:
-					self.gameDisplay.blit(self.__debugEmptyTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == -1.0:
-					self.gameDisplay.blit(self.__debugTakerTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == 1.0:
-					self.gameDisplay.blit(self.__debugKeeperTile, (j*self.__agent_block_size,i*self.__agent_block_size))
-				if grid[i][j] == 0.3:
-					self.gameDisplay.blit(self.__debugKeeperPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == -0.3:
-					self.gameDisplay.blit(self.__debugTakerPathTile, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == -0.6:
-					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-				if grid[i][j] == 0.6:
-					self.gameDisplay.blit(self.__debugTakerPathTileTwo, (j*self.__agent_block_size,i*self.__agent_block_size)) 
-		for z in range(len(substrate)):
+	def __drawBirdsEyeView(self, mode, gridList, substrate):
+		for z in range(len(gridList)):
 			i = substrate[z][0]
 			j = substrate[z][1]
-			self.gameDisplay.blit(self.__debugYellowDotImage, (j,i))
-			
+			if gridList[z] == 0.0:
+				self.gameDisplay.blit(self.__debugWhiteDotImage, (j,i))
+			if gridList[z] == -1.0:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i))
+			if gridList[z] == 1.0:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i))
+			if gridList[z] == 0.3:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i)) 
+			if gridList[z] == -0.3:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i)) 
+			if gridList[z] == -0.6:
+				self.gameDisplay.blit(self.__debugRedDotImage, (j,i)) 
+			if gridList[z] == 0.6:
+				self.gameDisplay.blit(self.__debugBlueDotImage, (j,i)) 
+		kZeroIndex = self.bev.getBallHolderTile(self.keeperArray)
+		self.gameDisplay.blit(self.__debugBlackDotImage, (substrate[kZeroIndex][1], substrate[kZeroIndex][0]))
+		if(mode == "hyperNEAT"):
+			o = self.keeperArray[0].getNNoutput();
+			if(o != None):
+				self.__DrawHyperNEATOut(o, self.bev.getBlockSize(), substrate)
 					
-
-
+	def __DrawHyperNEATOut(self, output, blockSize, substrate):
+		#diff = blockSize / 2
+		for i in range(len(substrate)):
+			text= self.verysmallfont.render(str(round(output[i], 2)), True, (0, 0, int(255*output[i])) )
+			self.gameDisplay.blit(text, [substrate[i][1],substrate[i][0] - 10]) 
+					
+			
+							
 	def __updateScore(self):
 		"""
 		This function simply increments the keeper's score for each tick that the
@@ -809,12 +823,13 @@ class keepAway():
 
 	def _sendBirdsEyeView(self):
 		#get the state variables
-		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
-		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height);
+		self.bev_grid_as_grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray);
+		self.bev_grid_as_list = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray);
+		self.bev_substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray);
+		self.bev_keeper_sub_index = self.bev.getBallHolderTile(self.keeperArray)
 		#send the state variables to each keeper
 		for i in range(len(self.keeperArray)):
-			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate)
+			self.keeperArray[i].receiveBirdsEyeView(self.bev_grid_as_grid, self.bev_grid_as_list, self.bev_substrate, self.bev_keeper_sub_index)
 
 	def _sendNEATTraining(self):
 		NEATTraining.train(self)
@@ -847,7 +862,7 @@ class keepAway():
 
 
 	"""THIS CODE IS THE INTRO AND GAME LOOPS"""
-	def commonFunctionality(self, showDisplay = True, turnOnGrid = False):
+	def commonFunctionality(self, mode, showDisplay = True, turnOnGrid = False):
 		#this is common code that will occur regardless of what agent you picked
 		#if (self.fieldBall.inPosession == False):
 		newBallPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, kUtil.scalarMultiply(self.maxBallSpeed, kUtil.unitVector(self.fieldBall.trueBallDirection)))
@@ -861,11 +876,11 @@ class keepAway():
 		#remove this line if you don't want the grid to be drawn
 		if showDisplay:
 			if (turnOnGrid):
-				grid = self.bev.getBirdsEyeView(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
-				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray, self.__display_width, self.__display_height)
-				self.__drawWorld (grid, substrate)
+				gridList = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray)
+				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray)
+				self.__drawWorld (mode, gridList, substrate)
 			else:
-				self.__drawWorld()
+				self.__drawWorld(mode)
 			self.__displayScore()
 			pygame.display.update()
 
@@ -934,7 +949,7 @@ class keepAway():
 
 		:returns: no return
 		"""  
-		self.__drawWorld ()
+		self.__drawWorld (mode)
 		gameExit = False
 		pygame.display.update()
 		experimentAgent = self.keeperArray[0]
@@ -993,7 +1008,7 @@ class keepAway():
 					keeper.decisionFlowChart()
 				for taker in self.takerArray:
 					taker.decisionFlowChart()
-			self.commonFunctionality(True,turnOnGrid)
+			self.commonFunctionality(mode, True,turnOnGrid)
 	
 			if self.isGameOver() == True:
 				gameExit = True
