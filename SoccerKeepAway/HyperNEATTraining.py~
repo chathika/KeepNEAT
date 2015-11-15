@@ -21,7 +21,7 @@ import os.path
 import matplotlib.pyplot as plt
 
 params = NEAT.Parameters()
-params.PopulationSize = 300
+params.PopulationSize = 150
 
 '''
 params.DynamicCompatibility = True
@@ -78,16 +78,16 @@ params.CompatTreshold = 2.0
 params.YoungAgeTreshold = 15
 params.SpeciesMaxStagnation = 10
 params.OldAgeTreshold = 35
-params.MinSpecies = 25
-params.MaxSpecies = 50
-params.RouletteWheelSelection = True
+params.MinSpecies = 5
+params.MaxSpecies = 25
+params.RouletteWheelSelection = False
 
 params.MutateRemLinkProb = 0.01
 params.RecurrentProb = 0
-params.OverallMutationRate = 0.15
-params.MutateAddLinkProb = 0.08
-params.MutateAddNeuronProb = 0.04
-params.MutateWeightsProb = 0.70
+params.OverallMutationRate = 0.7
+params.MutateAddLinkProb = 0.05
+params.MutateAddNeuronProb = 0.02
+params.MutateWeightsProb = 0.90
 params.MaxWeight = 8.0
 params.WeightMutationMaxPower = 0.2
 params.WeightReplacementMaxPower = 1.0
@@ -99,11 +99,15 @@ params.MaxActivationA = 6.0
 
 params.MutateNeuronActivationTypeProb = 0.02
 
+params.CrossoverRate = 0.8
+
+params.InterSpeciesCrossoverRate = 0.01
+
 params.CPPN_Bias = -1.0
 
-params.Elitism = 0.05
+params.Elitism = 0.1
 
-params.SurvivalRate = 0.05
+params.SurvivalRate = 0.2
 
 params.ActivationFunction_SignedSigmoid_Prob = 0.0
 params.ActivationFunction_UnsignedSigmoid_Prob = 1.0
@@ -271,7 +275,7 @@ def train(worldRef):
 	else:
 		g = NEAT.Genome(0,
                     substrate.GetMinCPPNInputs(),
-                    0,
+                    1,
                     substrate.GetMinCPPNOutputs(),
                     False,
                     NEAT.ActivationFunction.TANH,
@@ -289,9 +293,11 @@ def train(worldRef):
 		#NEAT.ZipFitness(genome_list, fitness_list)
 
 		genome_list = []
-		for s in pop.Species:
+		genome_species_number = []
+		for index,s in enumerate(pop.Species):
 			for i in s.Individuals:
 				genome_list.append(i)
+				genome_species_number.append(index)
 		
 		print('All individuals:', len(genome_list))
 		
@@ -308,8 +314,11 @@ def train(worldRef):
 		for i,gen in enumerate(genome_list):
 			if i%100 == 0:
 				fitness = evaluate(worldRef,gen,substrate,i,True)
+				#print(fitness)
 			else:
 				fitness = evaluate(worldRef,gen,substrate,i)
+				#print(fitness)
+			print fitness, gen.NumNeurons(), genome_species_number[i], len(pop.Species)
 			gen.SetFitness(fitness)
 
 		best,index = max([(x.GetLeader().GetFitness(),y) for y,x in enumerate(pop.Species)])
