@@ -144,7 +144,7 @@ def evaluate(worldRef, genome, substrate, i, display = False, NNDisplay = False)
 	for keeper in worldRef.keeperArray:
 		keeper.receiveNN(net)
 		
-	while worldRef.isGameOver() == False:
+	while worldRef.isGameOver() == False and worldRef.keeperScore <= 10000:
 		#print("Entering while game is not over for ",counter,"  time")
 		#counter += 1
 		for event in pygame.event.get():
@@ -265,13 +265,15 @@ def train(worldRef):
 		#f = open('HyperNEAT_Population/population.txt', 'r')
 		#print (f)
 		#pop = NEAT.Population('HyperNEAT_Population/population.txt')
-		#g = NEAT.Genome('HyperNEAT_Population/genome.txt')
+		g = NEAT.Genome('HyperNEAT_Population/genome.txt')
 		'''		
 		print("Printing loaded popuation")
 		for s in pop.Species:
 			for i in s.Individuals:
 				print("Fitness: ",i.GetFitness())
 		'''
+		pop = NEAT.Population(g, params, True, 1.0,i)
+		pop.RNG.Seed(i)
 	else:
 		g = NEAT.Genome(0,
                     substrate.GetMinCPPNInputs(),
@@ -287,6 +289,7 @@ def train(worldRef):
 		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
+	#onceOnly = 0
 	for generation in range(1000):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
@@ -294,10 +297,17 @@ def train(worldRef):
 
 		genome_list = []
 		genome_species_number = []
+		numDone = 0
 		for index,s in enumerate(pop.Species):
 			for i in s.Individuals:
-				genome_list.append(i)
-				genome_species_number.append(index)
+				if	numDone == 148:
+					genome_list.append(g)
+					genome_species_number.append(index)
+					numDone = 0
+				else:
+					genome_list.append(i)
+					genome_species_number.append(index)
+					#numDone += 1
 		
 		print('All individuals:', len(genome_list))
 		

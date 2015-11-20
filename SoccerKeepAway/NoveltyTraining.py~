@@ -145,6 +145,7 @@ novelGenomes = []
 def evaluateNovelty(worldRef, genome, substrate, i, display = False, NNDisplay = False):
 	global novelSolutions
 	global novelGenomes
+	global best_genome_ever
 	screen = pygame.display.set_mode((600, 600))
 	space = pm.Space()
 	clock = pygame.time.Clock()
@@ -226,7 +227,7 @@ def evaluateNovelty(worldRef, genome, substrate, i, display = False, NNDisplay =
 			noveltyScore = 0
 			for i in range(lenMin):
 				noveltyScore += abs(currentHoldList[i][0] - novelSolution[i][0]) + abs(currentHoldList[i][1] - novelSolution[i][1]) 
-			noveltyScore += k * abs(len(novelSolution) - len(currentHoldList))
+			noveltyScore += k * (len(currentHoldList) - len(novelSolution))
 			if noveltyScore < noveltyMinScore:
 				noveltyMinScore = noveltyScore
 		noveltyScore = noveltyMinScore
@@ -356,21 +357,21 @@ def train(worldRef):
 	else:
 	'''
 	substrate = NEAT.Substrate(worldRef.bev_substrate,
-                           [],
+                           worldRef.bev_substrate,
                            worldRef.bev_substrate)
 	#substrate.m_with_distance = True;
 
 	print("Printing the substrate")
 	print(worldRef.bev_substrate)
 
-	substrate.m_allow_input_hidden_links = False
+	substrate.m_allow_input_hidden_links = True
 	substrate.m_allow_input_output_links = True
-	substrate.m_allow_hidden_hidden_links = False
-	substrate.m_allow_hidden_output_links = False
-	substrate.m_allow_output_hidden_links = False
-	substrate.m_allow_output_output_links = False
-	substrate.m_allow_looped_hidden_links = False
-	substrate.m_allow_looped_output_links = False
+	substrate.m_allow_hidden_hidden_links = True
+	substrate.m_allow_hidden_output_links = True
+	substrate.m_allow_output_hidden_links = True
+	substrate.m_allow_output_output_links = True
+	substrate.m_allow_looped_hidden_links = True
+	substrate.m_allow_looped_output_links = True
 
 	# let's set the activation functions
 	substrate.m_hidden_nodes_activation = NEAT.ActivationFunction.SIGNED_SIGMOID
