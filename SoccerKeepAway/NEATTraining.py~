@@ -125,7 +125,7 @@ def evaluate(worldRef, genome, i, display = False):
 			clock.tick(10000)
 
 
-		worldRef.commonFunctionality(showDisplay)
+		worldRef.commonFunctionality("NEAT",showDisplay,False)
 		worldRef.clock.tick(10000)
 
 	#print("Ending Evaluation ",i)
@@ -211,7 +211,7 @@ def train(worldRef):
 
 		generations = generation
 
-		if best > 7000:
+		if best > 10000:
 			break
 
 	net = NEAT.NeuralNetwork()

@@ -1,7 +1,7 @@
 """
 This module contains keepAway, which is the simulator class. 
 """
-import kUtil, agent, ball, getSimpleStateVars, handCoded, calcReceive, birdsEyeView, NEAT, hyperNEAT, NEATTraining, HyperNEATTraining
+import kUtil, agent, ball, getSimpleStateVars, handCoded, calcReceive, birdsEyeView, NEAT, hyperNEAT, NEATTraining, HyperNEATTraining, novelty, NoveltyTraining
 import pygame, sys, math
 from statistics import mode
 
@@ -839,6 +839,10 @@ class keepAway():
 		HyperNEATTraining.train(self)
 		return True
 
+	def _sendNoveltyTraining(self):
+		NoveltyTraining.train(self)
+		return True
+
 
 	def _sendCalcReceiveDecision(self):
 		"""
@@ -905,10 +909,13 @@ class keepAway():
 			                  40)   
 			self.__message_to_screen("S for HyperNEAT, ",
 			                  self.__black,
-			                  80)           
+			                  80)
+			self.__message_to_screen("P for Novelty Search, ",
+			                  self.__black,
+			                  120)            
 			self.__message_to_screen("H for hand coded agent, or E to exit.",
 			                  self.__black,
-			                  120) 
+			                  160) 
 			pygame.display.update()
 		#while in the intro, check for user input on what type of model they wanna use
 		while intro:
@@ -921,7 +928,11 @@ class keepAway():
 						self.__replaceAgents(hyperNEAT.hyperNEAT)
 						intro = False
 						return mode
-				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_p:
+						mode = "novelty"
+						self.__replaceAgents(novelty.novelty)
+						intro = False
+						return mode		
 					if event.key == pygame.K_n:
 						mode = "NEAT"
 						self.__replaceAgents(NEAT.NEAT)
@@ -1004,6 +1015,15 @@ class keepAway():
 				self._sendBirdsEyeView()
 				if (self.alreadyTrained == False):
 					self.alreadyTrained = self._sendHyperNEATTraining()
+				for keeper in self.keeperArray:
+					keeper.decisionFlowChart()
+				for taker in self.takerArray:
+					taker.decisionFlowChart()
+			elif(mode == "novelty"):
+				self._sendCalcReceiveDecision()
+				self._sendBirdsEyeView()
+				if (self.alreadyTrained == False):
+					self.alreadyTrained = self._sendNoveltyTraining()
 				for keeper in self.keeperArray:
 					keeper.decisionFlowChart()
 				for taker in self.takerArray:

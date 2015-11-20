@@ -15,23 +15,26 @@ class runme():
     either by user interupt, or by the game ending, print out the results. 
     """
     def __init__(self):
-        world = keepAway.keepAway(inputAgentSigmaNoise = 0.000000001, alreadyTrained = False, bevCustomTileSize = 50)
-        mode =world.game_intro()
-        
-        if (mode == "hyperNEAT"):
-            #hyperNEAT mode
-            print("execute hyperNEAT") 
-        elif (mode == "NEAT"):
-            #NEAT mode
-            print("execute NEAT")
-        elif (mode == "hand_coded"):
-            #hand coded mode
-            print("execute hand coded")
-        elif (mode == "manual"):
-            print("execute manual debugging mode")
-        world.gameLoop(mode, turnOnGrid = True)
-        world.pause("game over. Final Score: ", world.keeperScore)
-        
+		world = keepAway.keepAway(inputAgentSigmaNoise = 0.000000001, alreadyTrained = False, bevCustomTileSize = 23)
+		mode =world.game_intro()
+
+		if (mode == "hyperNEAT"):
+			#hyperNEAT mode
+			print("execute hyperNEAT") 
+		elif(mode == "novelty"):
+			#novelty search mode
+			print("execute novelty search")
+		elif (mode == "NEAT"):
+			#NEAT mode
+			print("execute NEAT")
+		elif (mode == "hand_coded"):
+			#hand coded mode
+			print("execute hand coded")
+		elif (mode == "manual"):
+			print("execute manual debugging mode")
+		world.gameLoop(mode, turnOnGrid = True)
+		world.pause("game over. Final Score: ", world.keeperScore)
+
 
         
         

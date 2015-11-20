@@ -46,10 +46,10 @@ class hyperNEAT(agent.agent):
 
 	def receiveNN(self, NN):
 		self.NN = NN
-	"""	
+	
 	#hyperNEAT has it's own passball function which will override the default
 	def _passBall(self, pointToPassTo):
-		
+		'''
 		If a keeper currently has the ball, then it has the option to hold the ball,
 		or pass it. Call this function to pass the ball. pointToPassTo is the coordinate that
 		the keeper can pass to. these are pixel values 
@@ -60,7 +60,7 @@ class hyperNEAT(agent.agent):
 		:type pointToPassTo: typle of int
 
 		:returns: no return 
-
+		'''
 		if self.fieldBall == None:
 			print("ERROR: trying to hold ball without actually having  ball")
 			return
@@ -77,7 +77,7 @@ class hyperNEAT(agent.agent):
 		self.isKicking = True
 		#kUtil.addVectorToPoint(self.fieldBall.trueBallPos, selfToTeammateVector)
 		self.fieldBall.updateDirection(kUtil.getNoisyVals(selfToTargetVector, self.getSigma()))
-	"""
+	
 	
 	def __getBallCenter(self, ballTopLeft):
 		return ( ballTopLeft[0] + (self.worldRef.get_ball_block_size()/2) , ballTopLeft[1] + (self.worldRef.get_ball_block_size()/2))
@@ -148,8 +148,8 @@ class hyperNEAT(agent.agent):
 			keeperIndex[0] = 2
 			keeperIndex[1] = 1
 			
-		#out,i = max([(x,y) for y,x in enumerate(o)])
-
+		out,i = max([(x,y) for y,x in enumerate(o)])
+		'''
 		if (o[holdDecision] >= o[passList[0]]) and (o[holdDecision] >= o[passList[1]]):
 			#print("Holding ball")
 			self._holdBall()
@@ -162,7 +162,12 @@ class hyperNEAT(agent.agent):
 				self._passBall(keeperIndex[1])
 
 		#print("The decision is: ",i)
-
+		'''
+		if i==holdDecision:
+			self._holdBall()
+		else:
+			self._passBall(self.bevSubstrate[i])
+		
 		return
 
 
