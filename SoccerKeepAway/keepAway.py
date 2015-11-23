@@ -965,7 +965,7 @@ class keepAway():
 		pygame.display.update()
 		experimentAgent = self.keeperArray[0]
 		#each occurance of this loop is treated as one simulation cycle
-		while not gameExit:
+		while (not gameExit) and self.keeperScore<=20000:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					gameExit = True

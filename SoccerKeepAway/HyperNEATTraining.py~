@@ -257,23 +257,24 @@ def train(worldRef):
 
 	substrate.m_with_distance = True;
 	
-	fileExists = False
-	#fileExists = os.path.isfile('HyperNEAT_Population/population.txt')
+	#fileExists = False
+	fileExists = os.path.isfile('HyperNEAT_Population/population.txt')
 	#fileExists = os.path.isfile('HyperNEAT_Population/genome.txt')
 	if fileExists:
 		print("There is a previous stored population, loading it")
 		#f = open('HyperNEAT_Population/population.txt', 'r')
 		#print (f)
-		#pop = NEAT.Population('HyperNEAT_Population/population.txt')
-		g = NEAT.Genome('HyperNEAT_Population/genome.txt')
+		pop = NEAT.Population('HyperNEAT_Population/population.txt')
+		print("The population has been loaded")
+		#g = NEAT.Genome('HyperNEAT_Population/genome.txt')
 		'''		
 		print("Printing loaded popuation")
 		for s in pop.Species:
 			for i in s.Individuals:
 				print("Fitness: ",i.GetFitness())
 		'''
-		pop = NEAT.Population(g, params, True, 1.0,i)
-		pop.RNG.Seed(i)
+		#pop = NEAT.Population(g, params, True, 1.0,i)
+		#pop.RNG.Seed(i)
 	else:
 		g = NEAT.Genome(0,
                     substrate.GetMinCPPNInputs(),
@@ -289,7 +290,7 @@ def train(worldRef):
 		pop.RNG.Seed(i)
 	generations = 0
 	global_best = 0
-	#onceOnly = 0
+	onceOnly = 0
 	for generation in range(1000):
 		#genome_list = NEAT.GetGenomeList(pop)
 		#fitness_list = NEAT.EvaluateGenomeList_Serial(genome_list, evaluate, display=False)
@@ -298,12 +299,14 @@ def train(worldRef):
 		genome_list = []
 		genome_species_number = []
 		numDone = 0
+		onceOnly = 0
 		for index,s in enumerate(pop.Species):
 			for i in s.Individuals:
-				if	numDone == 148:
-					genome_list.append(g)
+				if	numDone == 6 and onceOnly == 0:
+					i = g
+					genome_list.append(i)
 					genome_species_number.append(index)
-					numDone = 0
+					onceOnly = 1
 				else:
 					genome_list.append(i)
 					genome_species_number.append(index)

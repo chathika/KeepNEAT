@@ -37,7 +37,7 @@ NoveltySearch_Recompute_Sparseness_Each 25
 MutateAddNeuronProb 0.02000000000000000042
 SplitRecurrent true
 SplitLoopedRecurrent true
-NeuronTries 32630
+NeuronTries 32581
 MutateAddLinkProb 0.05000000000000000278
 MutateAddLinkFromBiasProb 0.00000000000000000000
 MutateRemLinkProb 0.01000000000000000021
