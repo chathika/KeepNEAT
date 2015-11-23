@@ -1030,7 +1030,7 @@ class keepAway():
 					taker.decisionFlowChart()
 			self.commonFunctionality(mode, True,turnOnGrid)
 	
-			if self.isGameOver() == True:
+			if self.isGameOver() == True or self.keeperScore>20000:
 				gameExit = True
 				print("final score: ", self.keeperScore) 
 			#this specifies frames per second
