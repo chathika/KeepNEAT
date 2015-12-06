@@ -240,7 +240,7 @@ class keepAway():
 			self.clock.tick(10)
 
 
-	def __drawWorld (self, mode, gridList = None, substrate = None):
+	def __drawWorld (self, mode, gridList = None, substrate = None, prettyGrid = False):
 		"""
 		This function will go and update the screen to display the next frame of 
 		animation. This function should be called only after all the movement
@@ -270,9 +270,12 @@ class keepAway():
 		#you may want to comment this code out after debugging is done
 		if (self.keeperArray[0].onReceiveDecision != None):
 			self.gameDisplay.blit(self.__predictedImage, (self.keeperArray[0].onReceiveDecision[1][1] , self.keeperArray[0].onReceiveDecision[1][0]) )  
-				
+			
 		if (gridList != None and substrate != None):
-			self.__drawBirdsEyeView(mode, gridList, substrate)
+			if (prettyGrid == False):
+				self.__drawBirdsEyeView(mode, gridList, substrate)
+			else:
+				self.__drawPrettyBirdsEyeView(mode, gridList, substrate)
 
 	def __drawBirdsEyeView(self, mode, gridList, substrate):
 		for z in range(len(gridList)):
@@ -305,7 +308,28 @@ class keepAway():
 			text= self.verysmallfont.render(str(round(output[i], 2)), True, (0, 0, int(255*output[i])) )
 			self.gameDisplay.blit(text, [substrate[i][1],substrate[i][0] - 10]) 
 					
-			
+	def __drawPrettyBirdsEyeView(self, mode, gridList, substrate):
+		for z in range(len(gridList)):
+			i = substrate[z][0]
+			j = substrate[z][1]
+			if gridList[z] == 0.0:
+				self.gameDisplay.blit(self.__debugEmptyTile, self.__shift(j,i))
+			if gridList[z] == -1.0:
+				self.gameDisplay.blit(self.__debugTakerTile, self.__shift(j,i))
+			if gridList[z] == 1.0:
+				self.gameDisplay.blit(self.__debugKeeperTile, self.__shift(j,i))
+			if gridList[z] == 0.3:
+				self.gameDisplay.blit(self.__debugKeeperPathTile, self.__shift(j,i)) 
+			if gridList[z] == -0.3:
+				self.gameDisplay.blit(self.__debugTakerPathTile, self.__shift(j,i)) 
+			if gridList[z] == -0.6:
+				self.gameDisplay.blit(self.__debugTakerPathTileTwo, self.__shift(j,i)) 
+			if gridList[z] == 0.6:
+				self.gameDisplay.blit(self.__debugKeeperPathTileTwo, self.__shift(j,i)) 
+
+
+	def __shift(self, j, i):
+		return (j - (self.__agent_block_size/2) , i - (self.__agent_block_size/2))		
 							
 	def __updateScore(self):
 		"""
@@ -866,7 +890,7 @@ class keepAway():
 
 
 	"""THIS CODE IS THE INTRO AND GAME LOOPS"""
-	def commonFunctionality(self, mode, showDisplay = True, turnOnGrid = False):
+	def commonFunctionality(self, mode, showDisplay = True, turnOnGrid = False, prettyGrid = False):
 		#this is common code that will occur regardless of what agent you picked
 		#if (self.fieldBall.inPosession == False):
 		newBallPoint = kUtil.addVectorToPoint(self.fieldBall.trueBallPos, kUtil.scalarMultiply(self.maxBallSpeed, kUtil.unitVector(self.fieldBall.trueBallDirection)))
@@ -882,7 +906,7 @@ class keepAway():
 			if (turnOnGrid):
 				gridList = self.bev.getBirdsEyeViewAsList(self.keeperArray, self.takerArray)
 				substrate = self.bev.getSubstrate(self.keeperArray, self.takerArray)
-				self.__drawWorld (mode, gridList, substrate)
+				self.__drawWorld (mode, gridList, substrate, prettyGrid)
 			else:
 				self.__drawWorld(mode)
 			self.__displayScore()
@@ -951,7 +975,7 @@ class keepAway():
 						self.__exitSim()
 			self.clock.tick(5)
 
-	def gameLoop(self, mode, turnOnGrid = False):
+	def gameLoop(self, mode, turnOnGrid = False, prettyGrid = False):
 		"""
 		This is the main game loop. Each iteration of this counts as a tick. 
 		With each tick, an agent can move keepAway.maxPlayerSpeed units, and the
@@ -1028,7 +1052,7 @@ class keepAway():
 					keeper.decisionFlowChart()
 				for taker in self.takerArray:
 					taker.decisionFlowChart()
-			self.commonFunctionality(mode, True,turnOnGrid)
+			self.commonFunctionality(mode, True,turnOnGrid, prettyGrid)
 	
 			if self.isGameOver() == True or self.keeperScore>20000:
 				gameExit = True
